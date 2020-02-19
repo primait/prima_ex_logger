@@ -8,7 +8,7 @@ defmodule PrimaExLogger do
 
   @ignored_metadata_keys ~w[ansi_color initial_call crash_reason pid]a
 
-  @spec init({PrimaExLogger, atom()}) :: {'error',any()} | {'ok',any()} | {'ok',any(),'hibernate'}
+  @spec init({PrimaExLogger, atom()}) :: {:error,any()} | {:ok,any()} | {:ok,any(),:hibernate}
   def init({__MODULE__, name}) do
     {:ok, configure(name, [])}
   end
