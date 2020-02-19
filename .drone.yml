@@ -27,15 +27,6 @@ steps:
       - . /etc/profile.d/ecs-credentials-endpoint
       - cache-restore
 
-  - name: check-secrets
-    image: prima/drone-tools:1.15.0
-    volumes:
-      - name: ecs
-        path: /etc/profile.d/ecs-credentials-endpoint
-    commands:
-      - . /etc/profile.d/ecs-credentials-endpoint
-      - check-secrets-grants
-
   - name: init
     image: elixir:1.7
     volumes:
@@ -124,7 +115,10 @@ steps:
       - . /etc/profile.d/ecs-credentials-endpoint
       - cache-save _build deps
     depends_on:
-      - deploy
+      - dialyzer
+      - test
+      - credo
+      - format
     when:
       branch:
         - master
