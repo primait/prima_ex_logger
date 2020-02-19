@@ -8,7 +8,7 @@ defmodule PrimaExLogger do
 
   @ignored_metadata_keys ~w[ansi_color initial_call crash_reason pid]a
 
-  @spec init({atom(), String.t()}) :: {:error, any()} | {:ok, any()} | {:ok, any(), :hibernate}
+  @spec init({PrimaExLogger, atom()}) :: any()
   def init({__MODULE__, name}) do
     {:ok, configure(name, [])}
   end
@@ -17,7 +17,7 @@ defmodule PrimaExLogger do
     {:ok, :ok, configure(name, opts)}
   end
 
-  @spec configure(String.t(), list()) :: map()
+  @spec configure(atom(), Keyword.t()) :: map()
   defp configure(name, opts) do
     env = Application.get_env(:logger, name, [])
     opts = Keyword.merge(env, opts)

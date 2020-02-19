@@ -8,7 +8,13 @@ defmodule PrimaExLogger.MixProject do
       source_url: "https://github.com/primait/prima_ex_logger",
       elixir: "~> 1.7",
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      dialyzer: [
+        plt_add_deps: :transitive,
+        ignore_warnings: ".dialyzerignore",
+        plt_add_apps: [:mix],
+        plt_ignore_apps: [:timex]
+      ]
     ]
   end
 

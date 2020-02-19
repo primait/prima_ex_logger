@@ -3,7 +3,7 @@
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `prima_logger` to your list of dependencies in `mix.exs`:
+by adding `prima_ex_logger` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
