@@ -9,5 +9,4 @@ config :logger, :prima_logger,
   level: :info,
   encoder: Poison,
   type: :test,
-  environment: :production,
-  metadata: [test1: "value1"]
+  environment: :production

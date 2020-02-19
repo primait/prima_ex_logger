@@ -6,7 +6,7 @@ defmodule PrimaExLogger do
 
   @behaviour :gen_event
 
-  @ignored_metadata_keys ~w[ansi_color initial_call crash_reason pid]a
+  @ignored_metadata_keys ~w[ansi_color pid]a
 
   @spec init({PrimaExLogger, atom()}) :: {:error, any()} | {:ok, any()} | {:ok, any(), :hibernate}
   def init({__MODULE__, name}) do
