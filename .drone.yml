@@ -1,0 +1,116 @@
+---
+kind: pipeline
+name: default
+
+volumes:
+  - name: docker
+    host:
+      path: /var/run/docker.sock
+  - name: ecs
+    host:
+      path: /etc/profile.d/ecs-credentials-endpoint
+
+clone:
+  depth: 1
+
+steps:
+  - name: cache-restore
+    image: prima/drone-tools:1.15.0
+    volumes:
+      - name: ecs
+        path: /etc/profile.d/ecs-credentials-endpoint
+      - name: docker
+        path: /var/run/docker.sock
+    commands:
+      - . /etc/profile.d/ecs-credentials-endpoint
+      - cache-restore
+
+  - name: check-secrets
+    image: prima/drone-tools:1.15.0
+    volumes:
+      - name: ecs
+        path: /etc/profile.d/ecs-credentials-endpoint
+    commands:
+      - . /etc/profile.d/ecs-credentials-endpoint
+      - check-secrets-grants
+
+  - name: build-image
+    image: prima/elixir:1.7
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    commands:
+      - sed -i 's/USER app/USER root/g' Dockerfile
+      - docker build -t prima/prima_ex_logger-ci:1 .
+    depends_on:
+      - cache-restore
+
+  - name: init
+    image: prima/prima_ex_logger-ci:1
+    environment:
+      MIX_ENV: test
+    commands:
+      - mix deps.get
+    depends_on:
+      - build-image
+
+  - name: compile-test
+    image: prima/prima_ex_logger-ci:1
+    environment:
+      MIX_ENV: test
+    commands:
+      - mix compile --all-warnings --warnings-as-errors --ignore-module-conflict --debug-info
+    depends_on:
+      - init
+
+  - name: format
+    image: prima/prima_ex_logger-ci:1
+    environment:
+      MIX_ENV: test
+    commands:
+      - mix format --check-formatted mix.exs "lib/**/*.{ex,exs}" "test/**/*.{ex,exs}" "config/**/*.{ex,exs}"
+    depends_on:
+      - compile-test
+
+  - name: credo
+    image: prima/prima_ex_logger-ci:1
+    environment:
+      MIX_ENV: test
+    commands:
+      - mix credo -a
+    depends_on:
+      - compile-test
+
+  - name: test
+    image: prima/prima_ex_logger-ci:1
+    environment:
+      MIX_ENV: test
+    commands:
+      - mix test
+    depends_on:
+      - compile-test
+
+  - name: dialyzer
+    image: prima/prima_ex_logger-ci:1
+    environment:
+      MIX_ENV: test
+    commands:
+      - mix dialyzer --format dialyzer
+    depends_on:
+      - compile-test
+
+  - name: cache-save
+    image: prima/drone-tools:1.15.0
+    volumes:
+      - name: ecs
+        path: /etc/profile.d/ecs-credentials-endpoint
+      - name: docker
+        path: /var/run/docker.sock
+    commands:
+      - . /etc/profile.d/ecs-credentials-endpoint
+      - cache-save _build deps
+    depends_on:
+      - deploy
+    when:
+      branch:
+        - master
