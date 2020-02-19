@@ -41,6 +41,8 @@ steps:
     volumes:
       - name: mix
         path: /root/.mix
+      - name: docker
+        path: /var/run/docker.sock  
     commands:
       - mix local.rebar --force
       - mix local.hex --force
