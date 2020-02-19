@@ -35,7 +35,7 @@ steps:
       - check-secrets-grants
 
   - name: build-image
-    image: prima/elixir:1.7
+    image: elixir:1.7
     volumes:
       - name: docker
         path: /var/run/docker.sock
