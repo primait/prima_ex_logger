@@ -9,6 +9,8 @@ volumes:
   - name: ecs
     host:
       path: /etc/profile.d/ecs-credentials-endpoint
+  - name: mix
+    temp: {}
 
 clone:
   depth: 1
@@ -34,28 +36,24 @@ steps:
       - . /etc/profile.d/ecs-credentials-endpoint
       - check-secrets-grants
 
-  - name: build-image
+  - name: init
     image: elixir:1.7
     volumes:
-      - name: docker
-        path: /var/run/docker.sock
+      - name: mix
+        path: /root/.mix
     commands:
-      - sed -i 's/USER app/USER root/g' Dockerfile
-      - docker build -t prima/prima_ex_logger-ci:1 .
+      - mix local.rebar --force
+      - mix local.hex --force
+      - mix deps.get
+      - mix test
     depends_on:
       - cache-restore
 
-  - name: init
-    image: prima/prima_ex_logger-ci:1
-    environment:
-      MIX_ENV: test
-    commands:
-      - mix deps.get
-    depends_on:
-      - build-image
-
   - name: compile-test
-    image: prima/prima_ex_logger-ci:1
+    image: elixir:1.7
+    volumes:
+      - name: mix
+        path: /root/.mix
     environment:
       MIX_ENV: test
     commands:
@@ -64,7 +62,10 @@ steps:
       - init
 
   - name: format
-    image: prima/prima_ex_logger-ci:1
+    image: elixir:1.7
+    volumes:
+      - name: mix
+        path: /root/.mix
     environment:
       MIX_ENV: test
     commands:
@@ -73,7 +74,10 @@ steps:
       - compile-test
 
   - name: credo
-    image: prima/prima_ex_logger-ci:1
+    image: elixir:1.7
+    volumes:
+      - name: mix
+        path: /root/.mix
     environment:
       MIX_ENV: test
     commands:
@@ -82,7 +86,10 @@ steps:
       - compile-test
 
   - name: test
-    image: prima/prima_ex_logger-ci:1
+    image: elixir:1.7
+    volumes:
+      - name: mix
+        path: /root/.mix
     environment:
       MIX_ENV: test
     commands:
@@ -91,7 +98,10 @@ steps:
       - compile-test
 
   - name: dialyzer
-    image: prima/prima_ex_logger-ci:1
+    image: elixir:1.7
+    volumes:
+      - name: mix
+        path: /root/.mix
     environment:
       MIX_ENV: test
     commands:
@@ -106,6 +116,8 @@ steps:
         path: /etc/profile.d/ecs-credentials-endpoint
       - name: docker
         path: /var/run/docker.sock
+      - name: mix
+        path: /root/.mix
     commands:
       - . /etc/profile.d/ecs-credentials-endpoint
       - cache-save _build deps
