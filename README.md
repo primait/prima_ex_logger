@@ -31,7 +31,7 @@ config :logger, :prima_logger,
 ## Supported options
 
 - **level** (atom): minimum level to log
-- **encoder** (module): JSON encoder, default Jason. Tested with Jason and Poison
+- **encoder** (module): JSON encoder, default Jason. Tested with Jason, Poison and JSX
 - **type** (string): app name
 - **environment** (atom): current environment
 - **metadata** (list): custom metadata to append on every log, default []
