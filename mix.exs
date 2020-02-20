@@ -10,9 +10,7 @@ defmodule PrimaExLogger.MixProject do
       deps: deps(),
       aliases: aliases(),
       dialyzer: [
-        plt_add_deps: :transitive,
         ignore_warnings: ".dialyzerignore",
-        plt_add_apps: [:mix],
         plt_ignore_apps: [:timex]
       ]
     ]
