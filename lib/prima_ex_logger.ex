@@ -76,22 +76,46 @@ defmodule PrimaExLogger do
          metadata: fields
        }) do
     %{
-      "message" => message,
+      "message" => IO.iodata_to_binary(message),
       "level" => level,
       "type" => type,
       "environment" => environment,
-      "metadata" => get_metadata(metadata, fields),
+      "metadata" => take_metadata(metadata, fields),
       "timestamp" => timestamp_to_iso(timestamp)
     }
   end
 
-  @spec get_metadata(list(), any()) :: map()
-  defp get_metadata(metadata, fields) do
+  @spec take_metadata(list(), any()) :: map()
+  defp take_metadata(metadata, fields) do
     metadata
     |> Keyword.merge(fields)
     |> Keyword.drop(@ignored_metadata_keys)
+    |> to_printable()
+  end
+
+  def to_printable(v) when is_binary(v), do: v
+  def to_printable(v) when is_atom(v), do: v
+  def to_printable(v) when is_number(v), do: v
+
+  def to_printable(v) when is_list(v) do
+    if Keyword.keyword?(v) do
+      v
+      |> Enum.into(%{})
+      |> to_printable()
+    else
+      Enum.map(v, &to_printable/1)
+    end
+  end
+
+  def to_printable(%_{} = v), do: to_printable(inspect(v))
+
+  def to_printable(v) when is_map(v) do
+    v
+    |> Enum.map(fn {k, v} -> {to_printable(k), to_printable(v)} end)
     |> Enum.into(%{})
   end
+
+  def to_printable(v), do: inspect(v)
 
   @spec timestamp_to_iso(tuple()) :: String.t()
   defp timestamp_to_iso({{year, month, day}, {hour, minute, second, milliseconds}}) do
@@ -121,7 +145,7 @@ defmodule PrimaExLogger do
         IO.puts(json)
 
       {:error, reason} ->
-        IO.puts("Error during JSON encoding. #{inspect(reason)}")
+        IO.puts("\nError during JSON encoding. Reason: #{inspect(reason)}, event: #{inspect(event)}\n")
     end
   end
 
