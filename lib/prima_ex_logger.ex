@@ -145,7 +145,7 @@ defmodule PrimaExLogger do
 
       {:error, reason} ->
         IO.puts(
-          "\nError during JSON encoding. Reason: #{inspect(reason)}, event: #{inspect(event)}\n"
+          "Error during JSON encoding. Reason: #{inspect(reason)}, event: #{inspect(event)}"
         )
     end
   end
