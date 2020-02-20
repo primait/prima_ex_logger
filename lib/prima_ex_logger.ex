@@ -93,6 +93,7 @@ defmodule PrimaExLogger do
     |> to_printable()
   end
 
+  @spec to_printable(any()) :: any()
   def to_printable(v) when is_binary(v), do: v
   def to_printable(v) when is_atom(v), do: v
   def to_printable(v) when is_number(v), do: v
@@ -145,7 +146,9 @@ defmodule PrimaExLogger do
         IO.puts(json)
 
       {:error, reason} ->
-        IO.puts("\nError during JSON encoding. Reason: #{inspect(reason)}, event: #{inspect(event)}\n")
+        IO.puts(
+          "\nError during JSON encoding. Reason: #{inspect(reason)}, event: #{inspect(event)}\n"
+        )
     end
   end
 
