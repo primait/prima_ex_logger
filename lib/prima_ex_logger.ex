@@ -129,7 +129,8 @@ defmodule PrimaExLogger do
          ) do
       {:ok, ts} ->
         ts
-        |> Timex.to_datetime(Timezone.local())
+        |> Timex.to_datetime()
+        |> Timezone.convert("Etc/UTC")
         |> Timex.format!("{ISO:Extended}")
 
       _ ->

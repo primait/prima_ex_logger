@@ -4,4 +4,4 @@ lib/prima_ex_logger.ex:11: Invalid type specification for function 'Elixir.Prima
 lib/prima_ex_logger.ex:20: Invalid type specification for function 'Elixir.PrimaExLogger':configure/2. The success typing is (atom(),[{atom(),_}]) -> #{'encoder':=_, 'environment':=_, 'level':=_, 'metadata':=[any()], 'name':=atom(), 'type':=_}
 lib/prima_ex_logger.ex:73: Function forge_event/2 has no local return
 lib/prima_ex_logger.ex:120: Function timestamp_to_iso/1 has no local return
-lib/prima_ex_logger.ex:141: Function log/2 will never be called
+lib/prima_ex_logger.ex:142: Function log/2 will never be called
