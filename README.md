@@ -35,3 +35,6 @@ config :logger, :prima_logger,
 - **type** (string): app name
 - **environment** (atom): current environment
 - **metadata** (list): custom metadata to append on every log, default []
+- **metadata_opts** (list): list of opts that alter the handling of metadata. supported params:
+  -  `flattened: boolean()`: allows to flatten nested maps that get passed to metadata to root-level key/value pairs.
+
