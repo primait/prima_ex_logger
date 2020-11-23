@@ -1,8 +1,13 @@
 defmodule PrimaExLoggerTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case
+
   require Logger
 
   import ExUnit.CaptureIO
+
+  defmodule TestStruct do
+    defstruct [:field1, :field2]
+  end
 
   test "Happy case" do
     io =
@@ -61,25 +66,29 @@ defmodule PrimaExLoggerTest do
     io =
       capture_io(fn ->
         logger = new_logger()
-        log(logger, "Hello world!", :info, field1: "value1")
+
+        log(logger, "Hello world!", :info,
+          field1: "value1",
+          field_struct: %TestStruct{field1: "one", field2: %{hello: "world"}}
+        )
+
         :gen_event.stop(logger)
       end)
 
     event = Jason.decode!(io)
+
     assert event["metadata"]["field1"] == "value1"
+
+    assert event["metadata"]["field_struct"] == %{
+             "field1" => "one",
+             "field2" => %{"hello" => "world"}
+           }
   end
 
   test "Sent messages include static fields" do
-    opts =
-      :logger
-      |> Application.get_env(:prima_logger)
-      |> Keyword.put(:metadata, field2: "value2")
-
-    Application.put_env(:logger, :prima_logger, opts)
-
     io =
       capture_io(fn ->
-        logger = new_logger()
+        logger = new_logger(metadata: [field2: "value2"])
         log(logger, "Hello world!")
         :gen_event.stop(logger)
       end)
@@ -88,15 +97,16 @@ defmodule PrimaExLoggerTest do
     assert event["metadata"]["field2"] == "value2"
   end
 
-  defp new_logger do
+  defp new_logger(opts \\ []) do
     {:ok, manager} = :gen_event.start_link()
-    :gen_event.add_handler(manager, PrimaExLogger, {PrimaExLogger, :prima_logger})
+    :ok = :gen_event.add_handler(manager, PrimaExLogger, {PrimaExLogger, :prima_logger})
+    :ok = :gen_event.call(manager, PrimaExLogger, {:configure, opts})
     manager
   end
 
   defp log(logger, msg, level \\ :info, metadata \\ []) do
     ts = {{2017, 1, 1}, {1, 2, 3, 400}}
-    :gen_event.notify(logger, {level, logger, {Logger, msg, ts, metadata}})
+    :ok = :gen_event.notify(logger, {level, logger, {Logger, msg, ts, metadata}})
     Process.sleep(100)
   end
 end

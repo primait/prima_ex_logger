@@ -8,6 +8,9 @@ defmodule PrimaExLogger do
 
   @ignored_metadata_keys ~w[ansi_color pid]a
 
+  @dialyzer {:nowarn_function,
+             [init: 1, configure: 2, forge_event: 2, timestamp_to_iso: 1, log: 2]}
+
   @spec init({PrimaExLogger, atom()}) :: {:error, any()} | {:ok, any()} | {:ok, any(), :hibernate}
   def init({__MODULE__, name}) do
     {:ok, configure(name, [])}
@@ -108,7 +111,12 @@ defmodule PrimaExLogger do
     end
   end
 
-  def to_printable(%_{} = v), do: to_printable(inspect(v))
+  def to_printable(%t{} = v) when t in [Date, DateTime, NaiveDateTime],
+    do: to_printable(inspect(v))
+
+  def to_printable(%_{} = v) do
+    to_printable(Map.from_struct(v))
+  end
 
   def to_printable(v) when is_map(v) do
     Enum.into(v, %{}, fn {k, v} -> {to_printable(k), to_printable(v)} end)
