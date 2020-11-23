@@ -4,6 +4,10 @@ defmodule PrimaExLoggerTest do
 
   import ExUnit.CaptureIO
 
+  defmodule TestStruct do
+    defstruct [:field1, :field2]
+  end
+
   test "Happy case" do
     io =
       capture_io(fn ->
@@ -92,6 +96,23 @@ defmodule PrimaExLoggerTest do
     assert event["metadata"]["field4.field"] == [1, 2, 3]
     assert event["metadata"]["field4.extra.nested"] == "off"
     assert event["metadata"]["field4.extra.list"] == [4, 5, 6]
+  end
+
+  test "Sent messages include metadata, with flattening (including structs)" do
+    io =
+      capture_io(fn ->
+        logger = new_logger(metadata_opts: [flattened: true])
+
+        log(logger, "Hello world!", :info,
+          field: %TestStruct{field1: "one", field2: %{hello: "world"}}
+        )
+
+        :gen_event.stop(logger)
+      end)
+
+    event = Jason.decode!(io)
+    assert event["metadata"]["field.field1"] == "one"
+    assert event["metadata"]["field.field2.hello"] == "world"
   end
 
   test "Sent messages include static fields" do

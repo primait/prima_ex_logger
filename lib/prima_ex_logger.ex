@@ -126,7 +126,7 @@ defmodule PrimaExLogger do
     end
   end
 
-  def to_printable(%_{} = v), do: to_printable(inspect(v))
+  def to_printable(%_{} = v), do: to_printable(Map.from_struct(v))
 
   def to_printable(v) when is_map(v) do
     Enum.into(v, %{}, fn {k, v} -> {to_printable(k), to_printable(v)} end)
