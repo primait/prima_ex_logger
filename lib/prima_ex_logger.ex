@@ -127,7 +127,12 @@ defmodule PrimaExLogger do
       nil ->
         to_printable(Map.from_struct(v), custom_serializers)
 
-      {module, fun} ->
+      {_module, fun} when is_function(fun, 1) ->
+        fun
+        |> apply([v])
+        |> to_printable(custom_serializers)
+
+      {module, fun} when is_atom(fun) ->
         module
         |> apply(fun, [v])
         |> to_printable(custom_serializers)
