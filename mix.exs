@@ -9,6 +9,8 @@ defmodule PrimaExLogger.MixProject do
       elixir: "~> 1.7",
       deps: deps(),
       aliases: aliases(),
+      description: description(),
+      package: package(),
       dialyzer: [
         ignore_warnings: ".dialyzerignore"
       ]
@@ -27,6 +29,7 @@ defmodule PrimaExLogger.MixProject do
       {:poison, "~> 3.1", only: [:test]},
       {:credo, "~> 1.2", only: [:test], runtime: false},
       {:dialyxir, "~> 1.0.0-rc.7", only: [:test], runtime: false},
+      {:ex_doc, ">= 0.0.0", only: [:test], runtime: false},
       {:timex, "~> 3.5"}
     ]
   end
@@ -42,5 +45,18 @@ defmodule PrimaExLogger.MixProject do
         "format mix.exs \"lib/**/*.{ex,exs}\" \"test/**/*.{ex,exs}\" \"config/**/*.{ex,exs}\""
       ]
     ]
+  end
+
+  def package do
+    [
+      name: "prima_ex_logger",
+      maintainers: ["Michelangelo Morrillo"],
+      licenses: ["MIT"],
+      links: %{"Github" => "https://github.com/primait/prima_ex_logger"}
+    ]
+  end
+
+  def description do
+    "custom JSON Logger backend"
   end
 end
