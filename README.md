@@ -35,3 +35,5 @@ config :logger, :prima_logger,
 - **type** (string): app name
 - **environment** (atom): current environment
 - **metadata** (list): custom metadata to append on every log, default []
+- **metadata_serializers** (list) custom serializers for structs found in metadata, default []
+    - example: `[{Decimal, to_string}]`, will invoke `Decimal.to_string/1` when a `Decimal` struct is found among metadata
