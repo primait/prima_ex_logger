@@ -8,7 +8,7 @@ by adding `prima_ex_logger` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:prima_ex_logger, "~> 0.2.0"}
+    {:prima_ex_logger, "~> 0.2.1"}
   ]
 end
 ```
@@ -35,3 +35,6 @@ config :logger, :prima_logger,
 - **type** (string): app name
 - **environment** (atom): current environment
 - **metadata** (list): custom metadata to append on every log, default []
+- **metadata_serializers** (list): custom serializers for structs found in metadata, default []
+    - example: `[{Decimal, to_string}]`, will invoke `Decimal.to_string/1` when a `Decimal` struct is found among metadata
+    - example: `[{Decimal, &Kernel.to_string/1}]`, will invoke `Kernel.to_string/1` when a `Decimal` struct is found among metadata

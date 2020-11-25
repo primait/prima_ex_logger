@@ -31,6 +31,7 @@ defmodule PrimaExLogger do
     environment = Keyword.get(opts, :environment, nil)
     type = Keyword.get(opts, :type, nil)
     metadata = Keyword.get(opts, :metadata, []) |> configure_metadata()
+    metadata_serializers = Keyword.get(opts, :metadata_serializers, [])
 
     %{
       level: level,
@@ -38,7 +39,8 @@ defmodule PrimaExLogger do
       encoder: encoder,
       type: type,
       environment: environment,
-      metadata: metadata
+      metadata: metadata,
+      metadata_serializers: metadata_serializers
     }
   end
 
@@ -76,53 +78,74 @@ defmodule PrimaExLogger do
   defp forge_event({level, _, {Logger, message, timestamp, metadata}}, %{
          type: type,
          environment: environment,
-         metadata: fields
+         metadata: fields,
+         metadata_serializers: custom_serializers
        }) do
     %{
       "message" => IO.iodata_to_binary(message),
       "level" => level,
       "type" => type,
       "environment" => environment,
-      "metadata" => take_metadata(metadata, fields),
+      "metadata" => take_metadata(metadata, fields, custom_serializers),
       "timestamp" => timestamp_to_iso(timestamp)
     }
   end
 
-  @spec take_metadata(list(), any()) :: map()
-  defp take_metadata(metadata, fields) do
+  @spec take_metadata(list(), any(), list()) :: map()
+  defp take_metadata(metadata, fields, custom_serializers) do
     metadata
     |> Keyword.merge(fields)
     |> Keyword.drop(@ignored_metadata_keys)
-    |> to_printable()
+    |> to_printable(custom_serializers)
   end
 
-  @spec to_printable(any()) :: any()
-  def to_printable(v) when is_binary(v), do: v
-  def to_printable(v) when is_atom(v), do: v
-  def to_printable(v) when is_number(v), do: v
+  @spec to_printable(any(), list()) :: any()
+  def to_printable(v, _) when is_binary(v), do: v
+  def to_printable(v, _) when is_atom(v), do: v
+  def to_printable(v, _) when is_number(v), do: v
 
-  def to_printable(v) when is_list(v) do
+  def to_printable(v, custom_serializers) when is_list(v) do
     if Keyword.keyword?(v) do
       v
       |> Enum.into(%{})
-      |> to_printable()
+      |> to_printable(custom_serializers)
     else
-      Enum.map(v, &to_printable/1)
+      Enum.map(v, &to_printable(&1, custom_serializers))
     end
   end
 
-  def to_printable(%t{} = v) when t in [Date, DateTime, NaiveDateTime],
-    do: to_printable(inspect(v))
+  def to_printable(%t{} = v, custom_serializers) when t in [Date, DateTime, NaiveDateTime],
+    do: to_printable(inspect(v), custom_serializers)
 
-  def to_printable(%_{} = v) do
-    to_printable(Map.from_struct(v))
+  def to_printable(%t{} = v, custom_serializers) do
+    custom_serializers
+    |> Enum.find(fn
+      {^t, _} -> true
+      _ -> false
+    end)
+    |> case do
+      nil ->
+        to_printable(Map.from_struct(v), custom_serializers)
+
+      {_module, fun} when is_function(fun, 1) ->
+        fun
+        |> apply([v])
+        |> to_printable(custom_serializers)
+
+      {module, fun} when is_atom(fun) ->
+        module
+        |> apply(fun, [v])
+        |> to_printable(custom_serializers)
+    end
   end
 
-  def to_printable(v) when is_map(v) do
-    Enum.into(v, %{}, fn {k, v} -> {to_printable(k), to_printable(v)} end)
+  def to_printable(v, custom_serializers) when is_map(v) do
+    Enum.into(v, %{}, fn {k, v} ->
+      {to_printable(k, custom_serializers), to_printable(v, custom_serializers)}
+    end)
   end
 
-  def to_printable(v), do: inspect(v)
+  def to_printable(v, _), do: inspect(v)
 
   @spec timestamp_to_iso(tuple()) :: String.t()
   defp timestamp_to_iso({{year, month, day}, {hour, minute, second, milliseconds}}) do

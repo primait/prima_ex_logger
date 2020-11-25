@@ -85,6 +85,42 @@ defmodule PrimaExLoggerTest do
            }
   end
 
+  test "Sent messages include metadata, with custom serializer (1)" do
+    io =
+      capture_io(fn ->
+        logger = new_logger(metadata_serializers: [{Decimal, :to_string}])
+
+        log(logger, "Hello world!", :info,
+          field1: "value1",
+          field_decimal: Decimal.from_float(2.0)
+        )
+
+        :gen_event.stop(logger)
+      end)
+
+    event = Jason.decode!(io)
+    assert event["metadata"]["field1"] == "value1"
+    assert event["metadata"]["field_decimal"] == Decimal.to_string(Decimal.from_float(2.0))
+  end
+
+  test "Sent messages include metadata, with custom serializer (2)" do
+    io =
+      capture_io(fn ->
+        logger = new_logger(metadata_serializers: [{Decimal, &inspect/1}])
+
+        log(logger, "Hello world!", :info,
+          field1: "value1",
+          field_decimal: Decimal.from_float(2.0)
+        )
+
+        :gen_event.stop(logger)
+      end)
+
+    event = Jason.decode!(io)
+    assert event["metadata"]["field1"] == "value1"
+    assert event["metadata"]["field_decimal"] == inspect(Decimal.from_float(2.0))
+  end
+
   test "Sent messages include static fields" do
     io =
       capture_io(fn ->
