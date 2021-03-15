@@ -136,7 +136,7 @@ defmodule PrimaExLoggerTest do
   test "Same format without timex" do
     ts = {{2017, 1, 1}, {1, 2, 3, 400}}
     # this is what returns with timex: 2017-01-01T01:02:03.400000+00:00"
-    assert "2017-01-01T01:02:03.400000" == PrimaExLogger.timestamp_to_iso(ts)
+    assert "2017-01-01T01:02:03.400000Z" == PrimaExLogger.timestamp_to_iso(ts)
   end
 
   defp new_logger(opts \\ []) do

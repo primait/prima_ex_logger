@@ -162,7 +162,9 @@ defmodule PrimaExLogger do
            }
          ) do
       {:ok, ts} ->
-        NaiveDateTime.to_iso8601(ts, :extended)
+        ts
+        |> DateTime.from_naive!("Etc/UTC")
+        |> DateTime.to_iso8601(:extended)
 
       _ ->
         nil
