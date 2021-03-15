@@ -19,7 +19,7 @@ defmodule PrimaExLogger.MixProject do
 
   def application do
     [
-      extra_applications: [:logger, :timex]
+      extra_applications: [:logger]
     ]
   end
 

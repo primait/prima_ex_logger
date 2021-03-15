@@ -2,7 +2,6 @@ defmodule PrimaExLogger do
   @moduledoc """
   Custom logger to send json over stdout
   """
-  use Timex
 
   @behaviour :gen_event
 
