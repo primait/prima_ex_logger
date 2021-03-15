@@ -133,6 +133,12 @@ defmodule PrimaExLoggerTest do
     assert event["metadata"]["field2"] == "value2"
   end
 
+  test "Same format without timex" do
+    ts = {{2017, 1, 1}, {1, 2, 3, 400}}
+    # this is what returns with timex: 2017-01-01T01:02:03.400000+00:00"
+    assert "2017-01-01T01:02:03.400000Z" == PrimaExLogger.timestamp_to_iso(ts)
+  end
+
   defp new_logger(opts \\ []) do
     {:ok, manager} = :gen_event.start_link()
     :ok = :gen_event.add_handler(manager, PrimaExLogger, {PrimaExLogger, :prima_logger})
