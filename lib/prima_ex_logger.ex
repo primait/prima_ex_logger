@@ -148,21 +148,22 @@ defmodule PrimaExLogger do
   def to_printable(v, _), do: inspect(v)
 
   @spec timestamp_to_iso(tuple()) :: String.t()
-  defp timestamp_to_iso({{year, month, day}, {hour, minute, second, milliseconds}}) do
+  def timestamp_to_iso({{year, month, day}, {hour, minute, second, milliseconds}}) do
     case NaiveDateTime.new(
-           year,
-           month,
-           day,
-           hour,
-           minute,
-           second,
-           milliseconds * 1000
+           %Date{
+             year: year,
+             month: month,
+             day: day
+           },
+           %Time{
+             hour: hour,
+             minute: minute,
+             second: second,
+             microsecond: {1000 * milliseconds, 6}
+           }
          ) do
       {:ok, ts} ->
-        ts
-        |> Timex.to_datetime()
-        |> Timezone.convert("Etc/UTC")
-        |> Timex.format!("{ISO:Extended}")
+        NaiveDateTime.to_iso8601(ts, :extended)
 
       _ ->
         nil
