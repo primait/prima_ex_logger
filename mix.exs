@@ -18,6 +18,17 @@ defmodule PrimaExLogger.MixProject do
   end
 
   def application do
+    apps(Mix.env())
+  end
+
+  defp apps(:dev) do
+    [
+      mod: {PrimaExLogger.Application, []},
+      extra_applications: [:logger]
+    ]
+  end
+
+  defp apps(_) do
     [
       extra_applications: [:logger]
     ]

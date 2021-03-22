@@ -10,6 +10,10 @@ defmodule PrimaExLogger do
   @dialyzer {:nowarn_function,
              [init: 1, configure: 2, forge_event: 2, timestamp_to_iso: 1, log: 2]}
 
+  alias PrimaExLogger.TCPconn
+
+  @type enabled() :: true | false
+
   @spec init({PrimaExLogger, atom()}) :: {:error, any()} | {:ok, any()} | {:ok, any(), :hibernate}
   def init({__MODULE__, name}) do
     {:ok, configure(name, [])}
@@ -32,6 +36,7 @@ defmodule PrimaExLogger do
     metadata = Keyword.get(opts, :metadata, []) |> configure_metadata()
     metadata_serializers = Keyword.get(opts, :metadata_serializers, [])
     ignored_metadata_keys = Keyword.get(opts, :ignored_metadata_keys, [:conn])
+    tcp_logger? = System.get_env("TCP_LOGGER", "false") |> String.to_existing_atom()
 
     %{
       level: level,
@@ -41,11 +46,19 @@ defmodule PrimaExLogger do
       environment: environment,
       metadata: metadata,
       metadata_serializers: metadata_serializers,
-      ignored_metadata_keys: ignored_metadata_keys
+      ignored_metadata_keys: ignored_metadata_keys,
+      tcp_logger?: tcp_logger?
     }
   end
 
-  def handle_event({level, _, _} = event, %{level: min_level, encoder: encoder} = state) do
+  def handle_event(
+        {level, _, _} = event,
+        %{
+          level: min_level,
+          encoder: encoder,
+          tcp_logger?: tcp_logger?
+        } = state
+      ) do
     case Logger.compare_levels(level, min_level) do
       :lt ->
         nil
@@ -53,7 +66,7 @@ defmodule PrimaExLogger do
       _ ->
         event
         |> forge_event(state)
-        |> log(encoder)
+        |> log(encoder, tcp_logger?)
     end
 
     {:ok, state}
@@ -180,18 +193,22 @@ defmodule PrimaExLogger do
     end
   end
 
-  @spec log(map(), module()) :: :ok
-  defp log(event, encoder) do
+  @spec log(map(), module(), enabled()) :: :ok
+  defp log(event, encoder, tcp_logger?) do
     case apply(encoder, :encode, [event]) do
       {:ok, json} ->
-        IO.puts(json)
+        print_or_send(json, tcp_logger?)
 
       {:error, reason} ->
-        IO.puts(
+        err_msg =
           "Error during JSON encoding. Reason: #{inspect(reason)}, event: #{inspect(event)}"
-        )
+
+        print_or_send(err_msg, tcp_logger?)
     end
   end
+
+  defp print_or_send(json, false), do: IO.puts(json)
+  defp print_or_send(json, true), do: TCPconn.send(json)
 
   @spec configure_metadata(list() | atom()) :: list()
   defp configure_metadata([]), do: []
