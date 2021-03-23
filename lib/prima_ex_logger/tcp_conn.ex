@@ -1,8 +1,25 @@
 defmodule PrimaExLogger.TCPconn do
+  @moduledoc """
+  A generic server process that forwards the received string
+  to a host and port via TCP. To do so uses the erlang
+  `:gen_tcp` module.
+
+  """
   use GenServer
   require Logger
 
   defmodule State do
+    @moduledoc """
+    The TCPconn state module.
+
+    Requires `:host` and `:port` as mimimum values for the
+    state to open a tcp socket.
+
+    For more information about available options for the
+    socket connection [see](https://erlang.org/doc/man/gen_tcp.html#data-types).
+
+
+    """
     @enforce_keys [:host, :port]
     defstruct [
       :host,
