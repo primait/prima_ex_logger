@@ -24,6 +24,7 @@ defmodule PrimaExLogger.TCPconn do
     defstruct [
       :host,
       :port,
+      :socket,
       opts: [],
       timeout: 5000
     ]
@@ -38,38 +39,33 @@ defmodule PrimaExLogger.TCPconn do
   # Callbacks
 
   @impl true
-  def init(state) do
-    {:ok, state}
+  def init(%State{} = state) do
+    connect(state)
   end
 
   @impl true
-  def handle_call({:send, data}, _, %State{} = s) do
-    with {:ok, sock} <- connect(s),
-         {:ok, new_data} <- ensure_new_line(data),
-         :ok <- :gen_tcp.send(sock, new_data),
-         :ok <- :gen_tcp.shutdown(sock, :write) do
+  def handle_call({:send, data}, _, %State{socket: socket} = s) do
+    with {:ok, new_data} <- ensure_eof(data),
+         :ok <- :gen_tcp.send(socket, new_data) |> IO.inspect() do
       {:reply, :ok, s}
     else
-      {:backoff, milliseconds, s} ->
-        Process.sleep(milliseconds)
-        {:send, data, s}
-
       {:error, _} = error ->
-        {:disconnect, error, error, s}
+        IO.inspect("Send failed: #{inspect(error)}")
+        {:noreply, connect(s)}
     end
   end
 
   defp connect(%State{host: host, port: port, opts: opts, timeout: timeout} = s) do
     case :gen_tcp.connect(host, port, [active: false] ++ opts, timeout) do
-      {:ok, sock} ->
-        {:ok, sock}
+      {:ok, socket} ->
+        {:ok, %{s | socket: socket}}
 
       {:error, _} ->
         {:backoff, 1000, s}
     end
   end
 
-  defp ensure_new_line(data) do
-    {:ok, data |> String.trim() |> Kernel.<>("\n")}
+  defp ensure_eof(data) do
+    {:ok, data |> String.trim() |> Kernel.<>("\n") |> Kernel.<>(<<0>>)}
   end
 end
