@@ -8,7 +8,7 @@ defmodule PrimaExLogger do
   @ignored_metadata_keys ~w[ansi_color pid]a
 
   @dialyzer {:nowarn_function,
-             [init: 1, configure: 2, forge_event: 2, timestamp_to_iso: 1, log: 2]}
+             [init: 1, configure: 2, forge_event: 2, timestamp_to_iso: 1, log: 3]}
 
   alias PrimaExLogger.TCPconn
 
