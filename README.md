@@ -40,6 +40,8 @@ config :logger, :prima_logger,
   - example: `[{Decimal, &Kernel.to_string/1}]`, will invoke `Kernel.to_string/1` when a `Decimal` struct is found among metadata
 - **ignore_metadata_keys** (list of strings): specify a list of root level metadata keys to remove from all logs,
   if not provided it will default to `[:conn]` for security reasons
+- **host**(:inet.socket_address()): - example: {127, 0, 0, 1},
+  **port**(:inet.port()): - example: 10518
 
 ## Sending data to Datadog agent
 
