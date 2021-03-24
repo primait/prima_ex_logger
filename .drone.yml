@@ -28,14 +28,14 @@ steps:
       - cache-restore
 
   - name: init
-    image: elixir:1.7
+    image: elixir:1.11.2
     volumes:
       - name: mix
         path: /root/.mix
       - name: docker
         path: /var/run/docker.sock
     environment:
-      MIX_ENV: test    
+      MIX_ENV: test
     commands:
       - mix local.rebar --force
       - mix local.hex --force
@@ -44,7 +44,7 @@ steps:
       - cache-restore
 
   - name: compile-test
-    image: elixir:1.7
+    image: elixir:1.11.2
     volumes:
       - name: mix
         path: /root/.mix
@@ -56,7 +56,7 @@ steps:
       - init
 
   - name: format
-    image: elixir:1.7
+    image: elixir:1.11.2
     volumes:
       - name: mix
         path: /root/.mix
@@ -68,7 +68,7 @@ steps:
       - compile-test
 
   - name: credo
-    image: elixir:1.7
+    image: elixir:1.11.2
     volumes:
       - name: mix
         path: /root/.mix
@@ -80,7 +80,7 @@ steps:
       - compile-test
 
   - name: test
-    image: elixir:1.7
+    image: elixir:1.11.2
     volumes:
       - name: mix
         path: /root/.mix
@@ -92,7 +92,7 @@ steps:
       - compile-test
 
   - name: dialyzer
-    image: elixir:1.7
+    image: elixir:1.11.2
     volumes:
       - name: mix
         path: /root/.mix
