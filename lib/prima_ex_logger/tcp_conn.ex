@@ -46,11 +46,11 @@ defmodule PrimaExLogger.TCPconn do
   @impl true
   def handle_call({:send, data}, _, %State{socket: socket} = s) do
     with {:ok, new_data} <- ensure_eof(data),
-         :ok <- :gen_tcp.send(socket, new_data) |> IO.inspect() do
+         :ok <- :gen_tcp.send(socket, new_data) do
       {:reply, :ok, s}
     else
       {:error, _} = error ->
-        IO.inspect("Send failed: #{inspect(error)}")
+        IO.puts("Send failed: #{inspect(error)}")
         {:noreply, connect(s)}
     end
   end
