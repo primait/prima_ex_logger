@@ -8,7 +8,7 @@ defmodule PrimaExLogger.Application do
     port = Keyword.fetch!(env, :port)
 
     children = [
-      {PrimaExLogger.TCPconn, [host, port]}
+      {PrimaExLogger.TCPconn, [host: host, port: port]}
     ]
 
     opts = [strategy: :one_for_one, name: Naive.Application]

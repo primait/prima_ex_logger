@@ -41,7 +41,20 @@ defmodule PrimaExLogger.TCPconn do
   @impl true
   def init(host: host, port: port) do
     state = %State{host: host, port: port}
-    {:ok, state}
+    {:ok, state, {:continue, :connect}}
+  end
+
+  @impl true
+  def handle_continue(:connect, %State{} = s) do
+    {:ok, new_state} = connect(s)
+    {:noreply, new_state}
+  end
+
+  @impl true
+  def handle_call({:send, data}, _, %State{socket: nil} = s) do
+    IO.puts("Socket not ready, ignoring message: #{data}")
+
+    {:reply, :ok, s}
   end
 
   @impl true
@@ -52,8 +65,13 @@ defmodule PrimaExLogger.TCPconn do
     else
       {:error, _} = error ->
         IO.puts("Send failed: #{inspect(error)}")
-        {:noreply, connect(s)}
+
+        {:reply, :ok, connect(s)}
     end
+  end
+
+  defp connect(%State{socket: socket} = s) when is_port(socket) do
+    {:ok, s}
   end
 
   defp connect(%State{host: host, port: port, opts: opts, timeout: timeout} = s) do
