@@ -79,8 +79,8 @@ defmodule PrimaExLogger.TCPconn do
       {:ok, socket} ->
         {:ok, %{s | socket: socket}}
 
-      {:error, _} ->
-        {:backoff, 1000, s}
+      {:error, error} ->
+        {:error, error}
     end
   end
 
