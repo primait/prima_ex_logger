@@ -30,8 +30,8 @@ defmodule PrimaExLogger.TCPconn do
     ]
   end
 
-  def start_link(%State{} = state) do
-    GenServer.start_link(__MODULE__, state, name: __MODULE__)
+  def start_link(args) do
+    GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end
 
   def send(data), do: GenServer.call(__MODULE__, {:send, data})
@@ -39,8 +39,9 @@ defmodule PrimaExLogger.TCPconn do
   # Callbacks
 
   @impl true
-  def init(%State{} = state) do
-    connect(state)
+  def init(host: host, port: port) do
+    state = %State{host: host, port: port}
+    {:ok, state}
   end
 
   @impl true

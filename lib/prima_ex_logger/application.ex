@@ -1,7 +1,5 @@
 defmodule PrimaExLogger.Application do
   @moduledoc false
-  alias PrimaExLogger.TCPconn.State
-
   use Application
 
   def start(_type, _args) do
@@ -10,7 +8,7 @@ defmodule PrimaExLogger.Application do
     port = Keyword.fetch!(env, :port)
 
     children = [
-      {PrimaExLogger.TCPconn, %State{host: host, port: port}}
+      {PrimaExLogger.TCPconn, [host, port]}
     ]
 
     opts = [strategy: :one_for_one, name: Naive.Application]
