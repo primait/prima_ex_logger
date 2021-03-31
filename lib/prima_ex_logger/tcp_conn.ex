@@ -5,7 +5,7 @@ defmodule PrimaExLogger.TCPconn do
   `:gen_tcp` module.
 
   """
-  use GenServer
+  use GenServer, restart: :temporary
   require Logger
 
   defmodule State do
@@ -25,6 +25,8 @@ defmodule PrimaExLogger.TCPconn do
       :host,
       :port,
       :socket,
+      max_retries: 3,
+      retries: 0,
       opts: [],
       timeout: 5000
     ]
@@ -45,9 +47,30 @@ defmodule PrimaExLogger.TCPconn do
   end
 
   @impl true
-  def handle_continue(:connect, %State{} = s) do
-    {:ok, new_state} = connect(s)
-    {:noreply, new_state}
+  def handle_continue(
+        :connect,
+        %State{
+          max_retries: max_retries,
+          retries: retries
+        } = s
+      ) do
+    case {connect(s), retries} do
+      {{:ok, new_state}, _r} ->
+        {:noreply, new_state}
+
+      {{:backoff, _milliseconds}, r} when r > max_retries ->
+        IO.puts(
+          "Failed to connect to the socket review your config: \n" <>
+            "host: #{inspect(s.host)}\n" <>
+            "port: #{inspect(s.port)}"
+        )
+
+        {:stop, :unable_to_connect, s}
+
+      {{:backoff, milliseconds}, r} ->
+        Process.sleep(milliseconds)
+        {:noreply, %{s | retries: r + 1}, {:continue, :connect}}
+    end
   end
 
   @impl true
@@ -80,7 +103,8 @@ defmodule PrimaExLogger.TCPconn do
         {:ok, %{s | socket: socket}}
 
       {:error, error} ->
-        {:error, error}
+        IO.puts("Failed to connect to socket, error: #{inspect(error)}")
+        {:backoff, 1000}
     end
   end
 
