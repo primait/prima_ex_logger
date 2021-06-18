@@ -10,3 +10,5 @@ config :logger, :prima_logger,
   encoder: Poison,
   type: :test,
   environment: :production
+
+config :prima_ex_logger, structured: :enabled

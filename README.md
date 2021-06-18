@@ -38,3 +38,7 @@ config :logger, :prima_logger,
 - **metadata_serializers** (list): custom serializers for structs found in metadata, default []
     - example: `[{Decimal, to_string}]`, will invoke `Decimal.to_string/1` when a `Decimal` struct is found among metadata
     - example: `[{Decimal, &Kernel.to_string/1}]`, will invoke `Kernel.to_string/1` when a `Decimal` struct is found among metadata
+- **structured** (atom): whether to enable the `StructuredLogger` module, default `:removed`
+    - example: `:removed`, structured logger unavailable at compile time.
+    - example: `:disabled`, structured logger available - but will not log when called.
+    - example: `:enabled`, structured logger available & will log when called.

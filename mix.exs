@@ -57,6 +57,6 @@ defmodule PrimaExLogger.MixProject do
   end
 
   def description do
-    "custom JSON Logger backend"
+    "custom JSON Logger backend & structured logging frontend"
   end
 end
