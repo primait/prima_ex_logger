@@ -10,5 +10,5 @@ config :logger, :prima_logger,
   level: :info,
   metadata: :all,
   encoder: Jason,
-  type: :stonehenge,
-  environment: :staging
+  type: :test_app,
+  environment: :some_env

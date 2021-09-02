@@ -5,7 +5,7 @@ defmodule TestApp.Application do
   require Logger
 
   def start(_type, _args) do
-    Logger.info("LaFoser")
+    Logger.info("just a log")
     System.stop()
   end
 end

@@ -49,8 +49,6 @@ defmodule PrimaExLogger do
       metadata_serializers: metadata_serializers,
       app_version: app_version
     }
-
-    # |> IO.inspect(label: LePou)
   end
 
   def handle_event(
