@@ -19,12 +19,13 @@ defmodule PrimaExLogger.MixProject do
 
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger, :distillery]
     ]
   end
 
   defp deps do
     [
+      {:distillery, "~> 2.1"},
       {:decimal, "~> 2.0", only: [:test]},
       {:jason, "~> 1.2", only: [:test]},
       {:poison, "~> 3.1", only: [:test]},

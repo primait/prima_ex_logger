@@ -139,6 +139,54 @@ defmodule PrimaExLoggerTest do
     assert "2017-01-01T01:02:03.400000Z" == PrimaExLogger.timestamp_to_iso(ts)
   end
 
+  describe "App version option" do
+    test "defaults none/nil" do
+      # not part of event metadata as default
+      io =
+        capture_io(fn ->
+          logger = new_logger()
+          log(logger, "No app version")
+          :gen_event.stop(logger)
+        end)
+
+      event = Jason.decode!(io)
+      assert event["metadata"]["app_version"] == nil
+
+      # default is none
+
+      io =
+        capture_io(fn ->
+          logger = new_logger(app_version?: true)
+          log(logger, "None as app version")
+          :gen_event.stop(logger)
+        end)
+
+      event = Jason.decode!(io)
+      assert event["metadata"]["app_version"] == "none"
+    end
+
+    test "adds expected version to logger metadata" do
+      [
+        {"mix", ["deps.get"]},
+        {"mix", ["distillery.release"]},
+        {"bash", ["_build/dev/rel/test_app/bin/test_app", "console"]}
+      ]
+      |> Enum.map(fn {command, params} ->
+        assert {output, 0} = System.cmd(command, params, cd: "test/fixtures/test_app")
+        output
+      end)
+      |> List.last()
+      |> Jason.decode!()
+      |> get_in(["metadata", "app_version"])
+      |> Kernel.==("0.0.0-default")
+      |> assert()
+
+      # cleanup
+      File.rm_rf!("test/fixtures/test_app/deps")
+      File.rm_rf!("test/fixtures/test_app/_build")
+    end
+  end
+
   defp new_logger(opts \\ []) do
     {:ok, manager} = :gen_event.start_link()
     :ok = :gen_event.add_handler(manager, PrimaExLogger, {PrimaExLogger, :prima_logger})

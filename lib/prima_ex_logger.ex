@@ -3,6 +3,8 @@ defmodule PrimaExLogger do
   Custom logger to send json over stdout
   """
 
+  alias Distillery.Releases.Utils, as: RelUtils
+
   @behaviour :gen_event
 
   @ignored_metadata_keys ~w[ansi_color pid]a
@@ -32,6 +34,11 @@ defmodule PrimaExLogger do
     metadata = Keyword.get(opts, :metadata, []) |> configure_metadata()
     metadata_serializers = Keyword.get(opts, :metadata_serializers, [])
 
+    app_version =
+      opts
+      |> Keyword.get(:app_version?, false)
+      |> app_version()
+
     %{
       level: level,
       name: name,
@@ -39,11 +46,21 @@ defmodule PrimaExLogger do
       type: type,
       environment: environment,
       metadata: metadata,
-      metadata_serializers: metadata_serializers
+      metadata_serializers: metadata_serializers,
+      app_version: app_version
     }
+
+    # |> IO.inspect(label: LePou)
   end
 
-  def handle_event({level, _, _} = event, %{level: min_level, encoder: encoder} = state) do
+  def handle_event(
+        {level, _, _} = event,
+        %{
+          level: min_level,
+          encoder: encoder,
+          app_version: app_version
+        } = state
+      ) do
     case Logger.compare_levels(level, min_level) do
       :lt ->
         nil
@@ -51,6 +68,7 @@ defmodule PrimaExLogger do
       _ ->
         event
         |> forge_event(state)
+        |> put_app_version(app_version)
         |> log(encoder)
     end
 
@@ -72,6 +90,32 @@ defmodule PrimaExLogger do
   def terminate(_reason, _state) do
     :ok
   end
+
+  def app_version(true) do
+    RelUtils
+    |> function_exported?(:get_release_versions, 1)
+    |> case do
+      true ->
+        ""
+        |> RelUtils.get_release_versions()
+        |> List.first()
+
+      _ ->
+        "none"
+    end
+  end
+
+  def app_version(_), do: nil
+
+  defp put_app_version(event, nil), do: event
+
+  defp put_app_version(%{"metadata" => metadata} = event, version) do
+    new_metadata = Map.merge(metadata, %{"app_version" => version})
+
+    %{event | "metadata" => new_metadata}
+  end
+
+  defp put_app_version(event, _), do: event
 
   @spec forge_event(tuple(), map()) :: map()
   defp forge_event({level, _, {Logger, message, timestamp, metadata}}, %{
