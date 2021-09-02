@@ -168,11 +168,13 @@ defmodule PrimaExLoggerTest do
     test "adds expected version to logger metadata" do
       [
         {"mix", ["deps.get"]},
-        {"mix", ["distillery.release"]},
-        {"bash", ["_build/dev/rel/test_app/bin/test_app", "console"]}
+        {"mix", ["distillery.release", "--env=test"]},
+        {"bash", ["_build/test/rel/test_app/bin/test_app", "console"]}
       ]
       |> Enum.map(fn {command, params} ->
+        System.put_env("MIX_ENV", "test")
         assert {output, 0} = System.cmd(command, params, cd: "test/fixtures/test_app")
+
         output
       end)
       |> List.last()
