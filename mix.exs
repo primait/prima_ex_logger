@@ -29,7 +29,7 @@ defmodule PrimaExLogger.MixProject do
       {:jason, "~> 1.2", only: [:test]},
       {:poison, "~> 3.1", only: [:test]},
       {:credo, "~> 1.2", only: [:test], runtime: false},
-      {:dialyxir, "~> 1.0.0-rc.7", only: [:test], runtime: false},
+      {:dialyxir, "~> 1.1.0", only: [:test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: [:test, :dev], runtime: false}
     ]
   end
