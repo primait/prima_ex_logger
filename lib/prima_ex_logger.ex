@@ -31,6 +31,7 @@ defmodule PrimaExLogger do
     type = Keyword.get(opts, :type, nil)
     metadata = Keyword.get(opts, :metadata, []) |> configure_metadata()
     metadata_serializers = Keyword.get(opts, :metadata_serializers, [])
+    ignored_metadata_keys = Keyword.get(opts, :ignored_metadata_keys, [:conn])
 
     %{
       level: level,
@@ -39,7 +40,8 @@ defmodule PrimaExLogger do
       type: type,
       environment: environment,
       metadata: metadata,
-      metadata_serializers: metadata_serializers
+      metadata_serializers: metadata_serializers,
+      ignored_metadata_keys: ignored_metadata_keys
     }
   end
 
@@ -78,23 +80,30 @@ defmodule PrimaExLogger do
          type: type,
          environment: environment,
          metadata: fields,
-         metadata_serializers: custom_serializers
+         metadata_serializers: custom_serializers,
+         ignored_metadata_keys: ignored_metadata_keys
        }) do
     %{
       "message" => IO.iodata_to_binary(message),
       "level" => level,
       "type" => type,
       "environment" => environment,
-      "metadata" => take_metadata(metadata, fields, custom_serializers),
+      "metadata" =>
+        take_metadata(
+          metadata,
+          fields,
+          custom_serializers,
+          @ignored_metadata_keys ++ ignored_metadata_keys
+        ),
       "timestamp" => timestamp_to_iso(timestamp)
     }
   end
 
-  @spec take_metadata(list(), any(), list()) :: map()
-  defp take_metadata(metadata, fields, custom_serializers) do
+  @spec take_metadata(list(), any(), list(), list()) :: map()
+  defp take_metadata(metadata, fields, custom_serializers, ignore_keys) do
     metadata
     |> Keyword.merge(fields)
-    |> Keyword.drop(@ignored_metadata_keys)
+    |> Keyword.drop(ignore_keys)
     |> to_printable(custom_serializers)
   end
 
