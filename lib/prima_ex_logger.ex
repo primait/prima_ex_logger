@@ -45,16 +45,10 @@ defmodule PrimaExLogger do
     }
   end
 
-  def handle_event({level, _, _} = event, %{level: min_level, encoder: encoder} = state) do
-    case Logger.compare_levels(level, min_level) do
-      :lt ->
-        nil
-
-      _ ->
-        event
-        |> forge_event(state)
-        |> log(encoder)
-    end
+  def handle_event(event, %{encoder: encoder} = state) do
+    event
+    |> forge_event(state)
+    |> log(encoder)
 
     {:ok, state}
   end
