@@ -29,7 +29,6 @@ defmodule PrimaExLogger do
     opts = Keyword.merge(env, opts)
     Application.put_env(:logger, name, opts)
 
-    level = Keyword.get(opts, :level, :info)
     encoder = Keyword.get(opts, :encoder, Jason)
     environment = Keyword.get(opts, :environment, nil)
     type = Keyword.get(opts, :type, nil)
@@ -39,7 +38,6 @@ defmodule PrimaExLogger do
     ignored_metadata_keys = Keyword.get(opts, :ignored_metadata_keys, [:conn])
 
     %{
-      level: level,
       name: name,
       encoder: encoder,
       type: type,
@@ -51,16 +49,10 @@ defmodule PrimaExLogger do
     }
   end
 
-  def handle_event({level, _, _} = event, %{level: min_level, encoder: encoder} = state) do
-    case Logger.compare_levels(level, min_level) do
-      :lt ->
-        nil
-
-      _ ->
-        event
-        |> forge_event(state)
-        |> log(encoder)
-    end
+  def handle_event(event, %{encoder: encoder} = state) do
+    event
+    |> forge_event(state)
+    |> log(encoder)
 
     {:ok, state}
   end
