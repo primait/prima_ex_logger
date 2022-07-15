@@ -97,6 +97,10 @@ defmodule PrimaExLogger.TCPconn do
     {:ok, s}
   end
 
+  defp connect(%State{host: host} = s) when is_binary(host) do
+    connect(%{s | host: String.to_charlist(host)})
+  end
+
   defp connect(%State{host: host, port: port, opts: opts, timeout: timeout} = s) do
     case :gen_tcp.connect(host, port, [active: false] ++ opts, timeout) do
       {:ok, socket} ->
