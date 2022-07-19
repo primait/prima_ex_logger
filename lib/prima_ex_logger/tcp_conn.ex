@@ -113,6 +113,6 @@ defmodule PrimaExLogger.TCPconn do
   end
 
   defp ensure_eof(data) do
-    {:ok, data |> String.trim() |> Kernel.<>("\n") |> Kernel.<>(<<0>>)}
+    {:ok, data |> String.trim() |> Kernel.<>("\n")}
   end
 end
