@@ -89,7 +89,7 @@ defmodule PrimaExLogger.TCPconn do
       {:error, _} = error ->
         IO.puts("Send failed: #{inspect(error)}")
 
-        {:reply, :ok, connect(s)}
+        {:reply, :error, %{s | socket: nil}, {:continue, :connect}}
     end
   end
 
