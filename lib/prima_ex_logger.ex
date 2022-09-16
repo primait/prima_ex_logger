@@ -139,6 +139,8 @@ defmodule PrimaExLogger do
 
       {module, fun} when is_atom(fun) ->
         module
+        # Credo wants us to do `module.fun(v)`, but that doesn't work in Elixir..
+        # credo:disable-for-next-line Credo.Check.Refactor.Apply
         |> apply(fun, [v])
         |> to_printable(custom_serializers)
     end
@@ -173,7 +175,7 @@ defmodule PrimaExLogger do
 
   @spec log(map(), module()) :: :ok
   defp log(event, encoder) do
-    case apply(encoder, :encode, [event]) do
+    case encoder.encode(event) do
       {:ok, json} ->
         IO.puts(json)
 
