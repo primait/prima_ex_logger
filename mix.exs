@@ -6,7 +6,7 @@ defmodule PrimaExLogger.MixProject do
       app: :prima_ex_logger,
       version: "0.2.5",
       source_url: "https://github.com/primait/prima_ex_logger",
-      elixir: "~> 1.7",
+      elixir: "~> 1.11",
       deps: deps(),
       aliases: aliases(),
       description: description(),
