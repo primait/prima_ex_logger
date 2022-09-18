@@ -139,6 +139,48 @@ defmodule PrimaExLoggerTest do
     assert "2017-01-01T01:02:03.400000Z" == PrimaExLogger.timestamp_to_iso(ts)
   end
 
+  describe "opentelemetry metadata" do
+    test "doesn't break if raw opentelemetry log metadata is missing (no opentelemetry metadata is emitted)" do
+      io =
+        capture_io(fn ->
+          logger = new_logger(opentelemetry_metadata: :detailed)
+
+          log(logger, "hello world!", :info)
+
+          :gen_event.stop(logger)
+        end)
+
+      event = Jason.decode!(io)
+      assert "dd" not in Map.keys(event["metadata"])
+      assert "otel" not in Map.keys(event["metadata"])
+    end
+
+    test "values are computed correctly based on the raw opentelemetry metadata" do
+      io =
+        capture_io(fn ->
+          logger = new_logger(opentelemetry_metadata: :detailed)
+
+          log(logger, "hello world!", :info,
+            # this is the log metadata automatically added by opentelemetry sdk >= 1.1.0
+            otel_trace_id: '3f654ec56f0380000000000000000015',
+            otel_span_id: 'f000000000000005',
+            otel_trace_flags: '01'
+          )
+
+          :gen_event.stop(logger)
+        end)
+
+      event = Jason.decode!(io)
+      assert event["metadata"]["dd"] == %{"trace_id" => "21", "span_id" => "17293822569102704645"}
+
+      assert event["metadata"]["otel"] == %{
+               "trace_id" => "3f654ec56f0380000000000000000015",
+               "span_id" => "f000000000000005",
+               "trace_flags" => "01"
+             }
+    end
+  end
+
   defp new_logger(opts \\ []) do
     {:ok, manager} = :gen_event.start_link()
     :ok = :gen_event.add_handler(manager, PrimaExLogger, {PrimaExLogger, :prima_logger})
