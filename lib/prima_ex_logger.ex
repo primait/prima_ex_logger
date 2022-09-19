@@ -150,9 +150,9 @@ defmodule PrimaExLogger do
     dd_trace_id =
       metadata
       |> get_as_binary(:otel_trace_id)
-      |> :binary.decode_hex()
+      |> Integer.parse(16)
       |> case do
-        <<_::64, dd_trace_id::64>> -> Integer.to_string(dd_trace_id, 10)
+        {trace_id, ""} -> trace_id |> Bitwise.&&&(0xFFFFFFFFFFFFFFFF) |> Integer.to_string()
         _ -> ""
       end
 
