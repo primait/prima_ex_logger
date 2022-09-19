@@ -119,8 +119,19 @@ defmodule PrimaExLogger do
         metadata
 
       format when format in [:datadog, :opentelemetry_clean, :detailed] ->
-        opentelemetry_metadata = Keyword.take(metadata, @opentelemetry_sdk_metadata_keys)
-        Keyword.merge(no_otel_metadata, opentelemetry_metadata(opentelemetry_metadata, format))
+        otel_metadata =
+          try do
+            metadata
+            |> Keyword.take(@opentelemetry_sdk_metadata_keys)
+            |> opentelemetry_metadata(format)
+          rescue
+            # If the otel metadata is not in the format we expect
+            # (for example because the application may be oerwriting it with arbitrary values)
+            # we don't want the logger to break, but just return no opentelemetry metadata.
+            _ -> []
+          end
+
+        Keyword.merge(no_otel_metadata, otel_metadata)
     end
   end
 

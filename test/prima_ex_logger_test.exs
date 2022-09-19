@@ -155,6 +155,27 @@ defmodule PrimaExLoggerTest do
       assert "otel" not in Map.keys(event["metadata"])
     end
 
+    test "doesn't break if unexpected otel metadata values" do
+      # This tests that PrimaExLogger doesn't break if some user application
+      # is putting arbitrary, unexpected values in the metadata keys "reserved" by
+      # the OpenTelemetry SDK.
+      io =
+        capture_io(fn ->
+          logger = new_logger(opentelemetry_metadata: :detailed)
+
+          log(logger, "hello world!", :info,
+            otel_trace_id: "we would expect a charlist here..",
+            otel_trace_flags: %{"flag1" => false, "flag2" => true}
+          )
+
+          :gen_event.stop(logger)
+        end)
+
+      event = Jason.decode!(io)
+      assert "dd" not in Map.keys(event["metadata"])
+      assert "otel" not in Map.keys(event["metadata"])
+    end
+
     test "values are computed correctly based on the raw opentelemetry metadata" do
       io =
         capture_io(fn ->
