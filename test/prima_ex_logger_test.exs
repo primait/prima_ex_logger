@@ -182,7 +182,7 @@ defmodule PrimaExLoggerTest do
           logger = new_logger(opentelemetry_metadata: :detailed)
 
           log(logger, "hello world!", :info,
-            # this is the log metadata automatically added by opentelemetry sdk >= 1.1.0
+            # This is the log metadata automatically added by opentelemetry sdk >= 1.1.0
             otel_trace_id: '3f654ec56f0380000000000000000015',
             otel_span_id: 'f000000000000005',
             otel_trace_flags: '01'

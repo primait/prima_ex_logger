@@ -126,7 +126,7 @@ defmodule PrimaExLogger do
             |> opentelemetry_metadata(format)
           rescue
             # If the otel metadata is not in the format we expect
-            # (for example because the application may be oerwriting it with arbitrary values)
+            # (for example because the application may be overwriting it with arbitrary values)
             # we don't want the logger to break, but just return no opentelemetry metadata.
             _ -> []
           end
@@ -140,7 +140,7 @@ defmodule PrimaExLogger do
   def opentelemetry_metadata(raw_otel_metadata, format)
 
   def opentelemetry_metadata([], _format) do
-    # if here, it means the log event did not have the standard opentelemetry sdk metadata
+    # If here, it means the log event did not have the standard opentelemetry sdk metadata
     # Either the process that emitted the log did not have a trace context in its process dictionary
     # (incorrect or missing opentelemetry instrumentation), or the application is using
     # a version of opentelemetry API/SDK older than 1.1, which is when logger metadata was added.
@@ -151,7 +151,7 @@ defmodule PrimaExLogger do
   # https://docs.datadoghq.com/tracing/other_telemetry/connect_logs_and_traces/opentelemetry
   # With these, DataDog Logs-APM correlation features will work
   def opentelemetry_metadata(metadata, :datadog) do
-    # Convert 128 bit OpenTelemetry trace id to 64 bit DataDog trace id (take the last 64 bits)
+    # Convert 128 bit OpenTelemetry trace ID to 64 bit DataDog trace ID (take the last 64 bits)
     # Convert integer represented as a base16 charlist to a base10 binary
     # we could return the integer directly, which is probably slightly more efficient, but:
     # - what integer would we send when missing?

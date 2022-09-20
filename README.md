@@ -39,7 +39,7 @@ config :logger, :prima_logger,
 - **environment** (atom): current environment
 
 - **metadata** (list): custom metadata to append to every log, default `[]`.
-  Note that this has a different meaning that Logger's `metadata` option, which is used to indicate what metadata keys to keep instead!
+  Note that this has a different meaning than Logger's `metadata` option, which is used to indicate what metadata keys to keep instead!
 
 - **opentelemetry_metadata (`:datadog | :opentelemetry | :detailed | :none | :raw`)**: automatically adds distributed tracing information to logs metadata. This can be used to correlate logs across services exploiting the distributed tracing infrastructure.
 
@@ -51,14 +51,14 @@ config :logger, :prima_logger,
     This is the default and will allow you to use the extremely useful log / APM correlation features of DataDog.
     - `:opentelemetry`: sets `otel.trace_id`, `otel.span_id` and `otel.trace_flags'` using the OpenTelemetry hex-encoded TraceId/SpanId formats.
     - `:detailed`: sets both of the above
-    - `none`: No automatic opentelemetry-related metadata at all in the produced logs. 
+    - `:none`: No automatic opentelemetry-related metadata at all in the produced logs. 
 
   Note that, for this functionality to work, your project must depend on `:opentelemetry_api` >= 1.1 and have functioning opentelemetry instrumentation,
   for example by using [prima_opentelemetry_ex](https://github.com/primait/prima_opentelemetry_ex).
 
 - **metadata_serializers** (list): custom serializers for structs found in metadata, default `[]`
-    - example: `[{Decimal, to_string}]`, will invoke `Decimal.to_string/1` when a `Decimal` struct is found among metadata
-    - example: `[{Decimal, &Kernel.to_string/1}]`, will invoke `Kernel.to_string/1` when a `Decimal` struct is found among metadata
+    - example: `[{Decimal, to_string}]`, will invoke `Decimal.to_string/1` when a `Decimal` struct is found in the metadata
+    - example: `[{Decimal, &Kernel.to_string/1}]`, will invoke `Kernel.to_string/1` when a `Decimal` struct is found in the metadata
 
 - **ignore_metadata_keys** (list of strings): specify a list of root level metadata keys to remove from all logs,
 if not provided it will default to `[:conn]` for security reasons
