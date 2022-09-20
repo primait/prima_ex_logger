@@ -7,9 +7,6 @@ defmodule PrimaExLogger do
 
   @ignored_metadata_keys ~w[ansi_color pid]a
 
-  @dialyzer {:nowarn_function,
-             [init: 1, configure: 2, forge_event: 2, timestamp_to_iso: 1, log: 2]}
-
   @spec init({PrimaExLogger, atom()}) :: {:error, any()} | {:ok, any()} | {:ok, any(), :hibernate}
   def init({__MODULE__, name}) do
     {:ok, configure(name, [])}
@@ -142,6 +139,8 @@ defmodule PrimaExLogger do
 
       {module, fun} when is_atom(fun) ->
         module
+        # Credo wants us to do `module.fun(v)`, but that doesn't work in Elixir..
+        # credo:disable-for-next-line Credo.Check.Refactor.Apply
         |> apply(fun, [v])
         |> to_printable(custom_serializers)
     end
@@ -157,32 +156,26 @@ defmodule PrimaExLogger do
 
   @spec timestamp_to_iso(tuple()) :: String.t()
   def timestamp_to_iso({{year, month, day}, {hour, minute, second, milliseconds}}) do
-    case NaiveDateTime.new(
-           %Date{
-             year: year,
-             month: month,
-             day: day
-           },
-           %Time{
-             hour: hour,
-             minute: minute,
-             second: second,
-             microsecond: {1000 * milliseconds, 6}
-           }
-         ) do
-      {:ok, ts} ->
-        ts
-        |> DateTime.from_naive!("Etc/UTC")
-        |> DateTime.to_iso8601(:extended)
-
-      _ ->
-        nil
-    end
+    NaiveDateTime.new!(
+      %Date{
+        year: year,
+        month: month,
+        day: day
+      },
+      %Time{
+        hour: hour,
+        minute: minute,
+        second: second,
+        microsecond: {1000 * milliseconds, 6}
+      }
+    )
+    |> DateTime.from_naive!("Etc/UTC")
+    |> DateTime.to_iso8601(:extended)
   end
 
   @spec log(map(), module()) :: :ok
   defp log(event, encoder) do
-    case apply(encoder, :encode, [event]) do
+    case encoder.encode(event) do
       {:ok, json} ->
         IO.puts(json)
 
