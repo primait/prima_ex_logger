@@ -114,7 +114,7 @@ defmodule PrimaExLogger do
         no_otel_metadata
 
       # Leave the standard log metadata set by the opentelemetry SDK untouched.
-      # Not recommended when sending logs to datadog, as these produce really ugly metadata
+      # Not recommended when sending logs to datadog, as this results in really ugly metadata.
       :raw ->
         metadata
 
@@ -179,7 +179,7 @@ defmodule PrimaExLogger do
     [dd: [trace_id: dd_trace_id, span_id: dd_span_id]]
   end
 
-  # Opentelemetry metadata in opentelemetry format: 128 bits trace ids and 64 bits span ids, hex-encoded as binaries.
+  # Opentelemetry metadata in opentelemetry format: 128 bit trace IDs and 64 bit span IDs, hex-encoded as binaries.
   # Saved in a `otel` "namespace."
   def opentelemetry_metadata(metadata, :opentelemetry) do
     [
