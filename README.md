@@ -1,5 +1,7 @@
 # PrimaExLogger
 
+⚠️ The pipeline isn't set up to publish the library automatically on **hex.pm**, ask on #team-devops for it to be published ⚠️
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
