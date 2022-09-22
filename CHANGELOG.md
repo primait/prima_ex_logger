@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - [Breaking] Loglevel configuration was removed from this library. Global `:logger` level should be configured instead.
+- [Breaking] opentelemetry-related metadata is now automatically transformed by `prima_ex_logger` into a DataDog-friendly
+  format. The behaviour can be customised using the new `opentelemetry_metadata` option.
 
 ## [0.2.5] - 2022-06-16
 
