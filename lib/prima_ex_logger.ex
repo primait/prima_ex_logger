@@ -83,66 +83,57 @@ defmodule PrimaExLogger do
       "metadata" => process_metadata(metadata, settings),
       "timestamp" => timestamp_to_iso(timestamp)
     }
+    |> add_opentelemetry_metadata(metadata, settings)
   end
 
   @spec process_metadata(Logger.metadata(), settings()) :: map()
   defp process_metadata(metadata, settings) do
-    metadata
-    |> Keyword.merge(settings.metadata)
-    |> alter_opentelemetry_metadata(settings)
-    |> Keyword.drop(@ignored_metadata_keys ++ settings.ignored_metadata_keys)
-    |> to_printable(settings.metadata_serializers)
-  end
+    metadata =
+      metadata
+      |> Keyword.merge(settings.metadata)
+      |> Keyword.drop(@ignored_metadata_keys ++ settings.ignored_metadata_keys)
 
-  @spec alter_opentelemetry_metadata(Logger.metadata(), settings()) :: Logger.metadata()
-  def alter_opentelemetry_metadata(metadata, settings)
-
-  def alter_opentelemetry_metadata(metadata, settings) do
     no_otel_metadata = Keyword.drop(metadata, @opentelemetry_sdk_metadata_keys)
+    metadata = if :raw == settings.opentelemetry_metadata, do: metadata, else: no_otel_metadata
 
-    case settings.opentelemetry_metadata do
-      # No opentelemetry-related metadata at all
-      :none ->
-        no_otel_metadata
+    to_printable(metadata, settings.metadata_serializers)
+  end
 
-      # Leave the standard log metadata set by the opentelemetry SDK untouched.
-      # Not recommended when sending logs to datadog, as this results in really ugly metadata.
-      :raw ->
+  @spec add_opentelemetry_metadata(map(), Logger.metadata(), settings()) :: map()
+  defp add_opentelemetry_metadata(event, metadata, settings) do
+    otel_metadata =
+      try do
         metadata
+        |> Keyword.take(@opentelemetry_sdk_metadata_keys)
+        |> opentelemetry_metadata(settings.opentelemetry_metadata)
+      rescue
+        # If the otel metadata is not in the format we expect
+        # (for example because the application may be overwriting it with arbitrary values)
+        # we don't want the logger to break, but just return no opentelemetry metadata.
+        _ -> []
+      end
 
-      format when format in [:datadog, :opentelemetry_clean, :detailed] ->
-        otel_metadata =
-          try do
-            metadata
-            |> Keyword.take(@opentelemetry_sdk_metadata_keys)
-            |> opentelemetry_metadata(format)
-          rescue
-            # If the otel metadata is not in the format we expect
-            # (for example because the application may be overwriting it with arbitrary values)
-            # we don't want the logger to break, but just return no opentelemetry metadata.
-            _ -> []
-          end
-
-        Keyword.merge(no_otel_metadata, otel_metadata)
-    end
+    otel_metadata |> to_printable(settings.metadata_serializers) |> Enum.into(event)
   end
 
-  @spec opentelemetry_metadata(Logger.metadata(), :datadog | :opentelemetry | :detailed) ::
+  @spec opentelemetry_metadata(
+          Logger.metadata(),
+          :datadog | :opentelemetry | :detailed | :raw | :none
+        ) ::
           Keyword.t()
-  def opentelemetry_metadata(raw_otel_metadata, format)
+  # If here, it means the log event did not have the standard opentelemetry sdk metadata
+  # Either the process that emitted the log did not have a trace context in its process dictionary
+  # (incorrect or missing opentelemetry instrumentation), or the application is using
+  # a version of opentelemetry API/SDK older than 1.1, which is when logger metadata was added.
+  defp opentelemetry_metadata([], _format), do: []
 
-  def opentelemetry_metadata([], _format) do
-    # If here, it means the log event did not have the standard opentelemetry sdk metadata
-    # Either the process that emitted the log did not have a trace context in its process dictionary
-    # (incorrect or missing opentelemetry instrumentation), or the application is using
-    # a version of opentelemetry API/SDK older than 1.1, which is when logger metadata was added.
-    []
-  end
+  defp opentelemetry_metadata(_, :raw), do: []
+  defp opentelemetry_metadata(_, :none), do: []
 
   # Opentelemetry metadata in "DataDog format", see:
   # https://docs.datadoghq.com/tracing/other_telemetry/connect_logs_and_traces/opentelemetry
   # With these, DataDog Logs-APM correlation features will work
-  def opentelemetry_metadata(metadata, :datadog) do
+  defp opentelemetry_metadata(metadata, :datadog) do
     # Convert 128 bit OpenTelemetry trace ID to 64 bit DataDog trace ID (take the last 64 bits)
     # Convert integer represented as a base16 charlist to a base10 binary
     # we could return the integer directly, which is probably slightly more efficient, but:
@@ -173,7 +164,7 @@ defmodule PrimaExLogger do
 
   # Opentelemetry metadata in opentelemetry format: 128 bit trace IDs and 64 bit span IDs, hex-encoded as binaries.
   # Saved in a `otel` "namespace."
-  def opentelemetry_metadata(metadata, :opentelemetry) do
+  defp opentelemetry_metadata(metadata, :opentelemetry) do
     [
       otel: [
         trace_id: get_as_binary(metadata, :otel_trace_id),
@@ -183,7 +174,7 @@ defmodule PrimaExLogger do
     ]
   end
 
-  def opentelemetry_metadata(metadata, :detailed) do
+  defp opentelemetry_metadata(metadata, :detailed) do
     # A combination of :datadog and :opentelemetry
     opentelemetry_metadata(metadata, :datadog) ++ opentelemetry_metadata(metadata, :opentelemetry)
   end
