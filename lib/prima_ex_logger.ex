@@ -121,6 +121,8 @@ defmodule PrimaExLogger do
           :datadog | :opentelemetry | :detailed | :raw | :none
         ) ::
           Keyword.t()
+  defp opentelemetry_metadata(raw_otel_metadata, format)
+
   # If here, it means the log event did not have the standard opentelemetry sdk metadata
   # Either the process that emitted the log did not have a trace context in its process dictionary
   # (incorrect or missing opentelemetry instrumentation), or the application is using
