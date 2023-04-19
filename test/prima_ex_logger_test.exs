@@ -172,8 +172,8 @@ defmodule PrimaExLoggerTest do
         end)
 
       event = Jason.decode!(io)
-      assert "dd" not in Map.keys(event["metadata"])
-      assert "otel" not in Map.keys(event["metadata"])
+      assert "dd" not in Map.keys(event)
+      assert "otel" not in Map.keys(event)
     end
 
     test "values are computed correctly based on the raw opentelemetry metadata" do
@@ -192,9 +192,9 @@ defmodule PrimaExLoggerTest do
         end)
 
       event = Jason.decode!(io)
-      assert event["metadata"]["dd"] == %{"trace_id" => "21", "span_id" => "17293822569102704645"}
+      assert event["dd"] == %{"trace_id" => "21", "span_id" => "17293822569102704645"}
 
-      assert event["metadata"]["otel"] == %{
+      assert event["otel"] == %{
                "trace_id" => "3f654ec56f0380000000000000000015",
                "span_id" => "f000000000000005",
                "trace_flags" => "01"
