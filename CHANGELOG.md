@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2023-04-19
+
+### Fixed
+
+- Properly set the trace correlation metadata fields ([#55](https://github.com/primait/prima_ex_logger/pull/55)).
+
 ## [0.3.0] - 2022-09-22
 
 ### Changed
@@ -17,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.5] - 2022-06-16
 
-[Unreleased]: https://github.com/primait/lira/compare/0.3.0...HEAD
-[0.3.0]: https://github.com/primait/lira/compare/0.2.5...0.3.0
-[0.2.5]: https://github.com/primait/lira/releases/tag/0.2.5
+[Unreleased]: https://github.com/primait/prima_ex_logger/compare/0.3.1...HEAD
+[0.3.1]: https://github.com/primait/prima_ex_logger/compare/0.3.0...0.3.1
+[0.3.0]: https://github.com/primait/prima_ex_logger/compare/0.2.5...0.3.0
+[0.2.5]: https://github.com/primait/prima_ex_logger/releases/tag/0.2.5
