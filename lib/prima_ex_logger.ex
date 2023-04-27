@@ -273,7 +273,6 @@ defmodule PrimaExLogger do
   defp configure_metadata(:all), do: []
   defp configure_metadata(metadata) when is_list(metadata), do: Enum.reverse(metadata)
 
-  defp format_country(country)
   defp format_country(nil), do: nil
   defp format_country(country), do: "prima:country:#{country}"
 end
