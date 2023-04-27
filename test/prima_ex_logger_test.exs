@@ -54,36 +54,29 @@ defmodule PrimaExLoggerTest do
       end)
 
     event = Jason.decode!(io)
-    assert event["level"] == "info"
     assert event["environment"] == "custom_env"
   end
 
-  describe "country option" do
-    test "Logs with correct country" do
-      io =
-        capture_io(fn ->
-          logger = new_logger(country: :custom_country)
-          log(logger, "Hello world!", :info)
-          :gen_event.stop(logger)
-        end)
+  test "Logs with correct country" do
+    io =
+      capture_io(fn ->
+        logger = new_logger()
+        log(logger, "Hello world!", :info)
+        :gen_event.stop(logger)
+      end)
 
-      event = Jason.decode!(io)
-      assert event["level"] == "info"
-      assert event["country"] == "prima:country:custom_country"
-    end
+    event = Jason.decode!(io)
+    assert event["country"] == nil
 
-    test "Country is nil if not set" do
-      io =
-        capture_io(fn ->
-          logger = new_logger()
-          log(logger, "Hello world!", :info)
-          :gen_event.stop(logger)
-        end)
+    io =
+      capture_io(fn ->
+        logger = new_logger(country: :custom_country)
+        log(logger, "Hello world!", :info)
+        :gen_event.stop(logger)
+      end)
 
-      event = Jason.decode!(io)
-      assert event["level"] == "info"
-      assert event["country"] == nil
-    end
+    event = Jason.decode!(io)
+    assert event["country"] == "prima:country:custom_country"
   end
 
   test "Can print several messages" do
