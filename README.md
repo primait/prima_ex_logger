@@ -25,7 +25,8 @@ config :logger,
 config :logger, :prima_logger,
   encoder: Poison,
   type: :your_app_name,
-  environment: :production
+  environment: :production,
+  country: :country
 ```
 
 ## Supported options
@@ -34,7 +35,9 @@ config :logger, :prima_logger,
 
 - **type** (string): app name
 
-- **environment** (atom): current environment
+- **environment** (atom)
+
+- **country** (atom)
 
 - **metadata** (list): custom metadata to append to every log, default `[]`.
   Note that this has a different meaning than Logger's `metadata` option, which is used to indicate what metadata keys to keep instead!
