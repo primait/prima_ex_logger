@@ -29,18 +29,20 @@ defmodule PrimaExLogger do
     opts = Keyword.merge(env, opts)
     Application.put_env(:logger, name, opts)
 
+    country = Keyword.get(opts, :country, nil)
     encoder = Keyword.get(opts, :encoder, Jason)
     environment = Keyword.get(opts, :environment, nil)
-    type = Keyword.get(opts, :type, nil)
-    metadata = Keyword.get(opts, :metadata, []) |> configure_metadata()
-    opentelemetry_metadata = Keyword.get(opts, :opentelemetry_metadata, :datadog)
-    metadata_serializers = Keyword.get(opts, :metadata_serializers, [])
     ignored_metadata_keys = Keyword.get(opts, :ignored_metadata_keys, [:conn])
+    metadata = Keyword.get(opts, :metadata, []) |> configure_metadata()
+    metadata_serializers = Keyword.get(opts, :metadata_serializers, [])
+    opentelemetry_metadata = Keyword.get(opts, :opentelemetry_metadata, :datadog)
+    type = Keyword.get(opts, :type, nil)
 
     %{
       name: name,
       encoder: encoder,
       type: type,
+      country: country,
       environment: environment,
       metadata: metadata,
       opentelemetry_metadata: opentelemetry_metadata,
@@ -79,6 +81,7 @@ defmodule PrimaExLogger do
       "message" => IO.iodata_to_binary(message),
       "level" => level,
       "type" => settings.type,
+      "country" => format_country(settings.country),
       "environment" => settings.environment,
       "metadata" => process_metadata(metadata, settings),
       "timestamp" => timestamp_to_iso(timestamp)
@@ -269,4 +272,6 @@ defmodule PrimaExLogger do
   defp configure_metadata([]), do: []
   defp configure_metadata(:all), do: []
   defp configure_metadata(metadata) when is_list(metadata), do: Enum.reverse(metadata)
+
+  defp format_country(country), do: "prima:country:#{country}"
 end
