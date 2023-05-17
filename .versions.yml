@@ -1,0 +1,5 @@
+files:
+  - path: mix.exs
+    pattern: '@version \"{version}\"'
+  - path: README.md
+    pattern: '\"~> {version}\"'

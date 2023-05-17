@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.4.0] - 2023-05-17
+
 ### Added
 
 - `:country` configuration option
@@ -27,7 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.5] - 2022-06-16
 
-[Unreleased]: https://github.com/primait/prima_ex_logger/compare/0.3.1...HEAD
+
+[Unreleased]: https://github.com/primait/prima_ex_logger/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/primait/prima_ex_logger/compare/0.3.1...0.4.0
 [0.3.1]: https://github.com/primait/prima_ex_logger/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/primait/prima_ex_logger/compare/0.2.5...0.3.0
 [0.2.5]: https://github.com/primait/prima_ex_logger/releases/tag/0.2.5
