@@ -1,11 +1,14 @@
 defmodule PrimaExLogger.MixProject do
   use Mix.Project
 
+  @source_url "https://github.com/primait/prima_ex_logger"
+  @version "0.4.0"
+
   def project do
     [
       app: :prima_ex_logger,
-      version: "0.3.1",
-      source_url: "https://github.com/primait/prima_ex_logger",
+      version: @version,
+      source_url: @source_url,
       elixir: "~> 1.11",
       deps: deps(),
       aliases: aliases(),
@@ -52,7 +55,7 @@ defmodule PrimaExLogger.MixProject do
       name: "prima_ex_logger",
       maintainers: ["Michelangelo Morrillo"],
       licenses: ["MIT"],
-      links: %{"Github" => "https://github.com/primait/prima_ex_logger"}
+      links: %{"Github" => @source_url}
     ]
   end
 
