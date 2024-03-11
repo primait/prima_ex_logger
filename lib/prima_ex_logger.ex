@@ -51,15 +51,15 @@ defmodule PrimaExLogger do
     }
   end
 
+  def handle_event(:flush, state) do
+    {:ok, state}
+  end
+
   def handle_event(event, %{encoder: encoder} = state) do
     event
     |> forge_event(state)
     |> log(encoder)
 
-    {:ok, state}
-  end
-
-  def handle_event(:flush, state) do
     {:ok, state}
   end
 

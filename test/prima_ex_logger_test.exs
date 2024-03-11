@@ -96,6 +96,10 @@ defmodule PrimaExLoggerTest do
     assert lines |> elem(2) |> Jason.decode!() |> Map.get("message") == "Bar!"
   end
 
+  test "Can handle flush" do
+    assert :ok = Logger.flush()
+  end
+
   test "Sent messages include metadata" do
     io =
       capture_io(fn ->
