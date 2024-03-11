@@ -2,7 +2,7 @@ defmodule PrimaExLogger.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/primait/prima_ex_logger"
-  @version "0.4.0-rc.0"
+  @version "0.4.1"
 
   def project do
     [
