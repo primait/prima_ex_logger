@@ -8,7 +8,7 @@ by adding `prima_ex_logger` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:prima_ex_logger, "~> 0.4.1"}
+    {:prima_ex_logger, "~> 0.5.0"}
   ]
 end
 ```
