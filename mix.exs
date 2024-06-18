@@ -9,7 +9,7 @@ defmodule PrimaExLogger.MixProject do
       app: :prima_ex_logger,
       version: @version,
       source_url: @source_url,
-      elixir: "~> 1.11",
+      elixir: "~> 1.12",
       deps: deps(),
       aliases: aliases(),
       description: description(),
@@ -30,7 +30,7 @@ defmodule PrimaExLogger.MixProject do
     [
       {:decimal, "~> 2.0", only: [:test]},
       {:jason, "~> 1.2", only: [:test]},
-      {:poison, "~> 5.0", only: [:test]},
+      {:poison, "~> 6.0", only: [:test]},
       {:credo, "~> 1.2", only: [:test], runtime: false},
       {:dialyxir, "~> 1.4.0", only: [:test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: [:test, :dev], runtime: false}
