@@ -42,9 +42,7 @@ defmodule PrimaExLogger.AuditLogTest do
       remote_address: "123.123.123.123"
     }
 
-    audit_log =
-      @example_log
-      |> AuditLog.http(http)
+    audit_log = AuditLog.http(@example_log, http)
 
     encoded = Jason.encode!(audit_log)
 
@@ -77,9 +75,7 @@ defmodule PrimaExLogger.AuditLogTest do
         environment: "test"
       }
 
-      audit_log =
-        @example_log
-        |> AuditLog.runtime(runtime)
+      audit_log = AuditLog.runtime(@example_log, runtime)
 
       encoded = Jason.encode!(audit_log)
 
