@@ -3,14 +3,16 @@ defmodule PrimaExLogger.AuditLogTest do
 
   alias PrimaExLogger.AuditLogging.AuditLog
 
+  @example_log %AuditLog{
+    actor: "actor",
+    event_name: "event_name",
+    message: "message",
+    timestamp: "timestamp"
+  }
+
   test "can add and encode simple optional fields" do
     audit_log =
-      %AuditLog{
-        actor: "actor",
-        event_name: "event_name",
-        message: "message",
-        timestamp: "timestamp"
-      }
+      @example_log
       |> AuditLog.created_at(1_738_662_929)
       |> AuditLog.metadata(%{
         field1: "field1",
@@ -41,12 +43,7 @@ defmodule PrimaExLogger.AuditLogTest do
     }
 
     audit_log =
-      %AuditLog{
-        actor: "actor",
-        event_name: "event_name",
-        message: "message",
-        timestamp: "timestamp"
-      }
+      @example_log
       |> AuditLog.http(http)
 
     encoded = Jason.encode!(audit_log)
@@ -64,5 +61,23 @@ defmodule PrimaExLogger.AuditLogTest do
     encoded = Jason.encode!(audit_log)
 
     assert String.contains?(encoded, ~s("correlation_id":"12344321"))
+  end
+
+  test "can add and encode runtime struct" do
+    runtime = %AuditLog.Runtime{
+      app_name: "some name",
+      app_version: "1.2.3",
+      environment: "test"
+    }
+
+    audit_log =
+      @example_log
+      |> AuditLog.runtime(runtime)
+
+    encoded = Jason.encode!(audit_log)
+
+    assert String.contains?(encoded, ~s("app_name":"some name"))
+    assert String.contains?(encoded, ~s("app_version":"1.2.3"))
+    assert String.contains?(encoded, ~s("environment":"test"))
   end
 end
