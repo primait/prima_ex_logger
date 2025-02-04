@@ -40,6 +40,8 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
   defmodule Http do
     @derive Jason.Encoder
     @enforce_keys [:host, :user_agent_string, :http_method, :path, :remote_address]
-    defstruct [:host, :user_agent_string, :http_method, :path, :remote_address]
+    defstruct [:host, :user_agent_string, :http_method, :path, :remote_address, :correlation_id]
+
+    def correlation_id(http, correlation_id), do: %{http | correlation_id: correlation_id}
   end
 end

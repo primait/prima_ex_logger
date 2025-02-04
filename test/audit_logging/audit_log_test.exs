@@ -51,10 +51,18 @@ defmodule PrimaExLogger.AuditLogTest do
 
     encoded = Jason.encode!(audit_log)
 
-    assert String.contains?(encoded, "host")
-    assert String.contains?(encoded, "user_agent")
-    assert String.contains?(encoded, "POST")
-    assert String.contains?(encoded, "/do-something")
-    assert String.contains?(encoded, "123.123.123.123")
+    assert String.contains?(encoded, ~s("host":"host"))
+    assert String.contains?(encoded, ~s("user_agent_string":"user_agent"))
+    assert String.contains?(encoded, ~s("http_method":"POST"))
+    assert String.contains?(encoded, ~s("path":"/do-something"))
+    assert String.contains?(encoded, ~s("remote_address":"123.123.123.123"))
+    assert String.contains?(encoded, ~s("correlation_id":null))
+
+    # with optional correlation_id
+    http = AuditLog.Http.correlation_id(http, "12344321")
+    audit_log = AuditLog.http(audit_log, http)
+    encoded = Jason.encode!(audit_log)
+
+    assert String.contains?(encoded, ~s("correlation_id":"12344321"))
   end
 end
