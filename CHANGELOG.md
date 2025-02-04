@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+---
+
+## [0.6.0] - 2025-02-04
+
 ### Added
 
 - `PrimaExLogger.AuditLogging` module with `log/1` and `log!/` functions to emit
@@ -58,7 +62,9 @@ and this project adheres to
 
 ## [0.2.5] - 2022-06-16
 
-[Unreleased]: https://github.com/primait/prima_ex_logger/compare/0.5.0...HEAD
+
+[Unreleased]: https://github.com/primait/prima_ex_logger/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/primait/prima_ex_logger/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/primait/prima_ex_logger/compare/0.4.1...0.5.0
 [0.4.1]: https://github.com/primait/prima_ex_logger/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/primait/prima_ex_logger/compare/0.3.1...0.4.0
