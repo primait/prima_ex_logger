@@ -63,21 +63,41 @@ defmodule PrimaExLogger.AuditLogTest do
     assert String.contains?(encoded, ~s("correlation_id":"12344321"))
   end
 
-  test "can add and encode runtime struct" do
-    runtime = %AuditLog.Runtime{
-      app_name: "some name",
-      app_version: "1.2.3",
-      environment: "test"
-    }
+  describe "runtime" do
+    test "can add and encode runtime struct" do
+      runtime = %AuditLog.Runtime{
+        app_name: "some name",
+        app_version: "1.2.3",
+        environment: "test"
+      }
 
-    audit_log =
-      @example_log
-      |> AuditLog.runtime(runtime)
+      audit_log =
+        @example_log
+        |> AuditLog.runtime(runtime)
 
-    encoded = Jason.encode!(audit_log)
+      encoded = Jason.encode!(audit_log)
 
-    assert String.contains?(encoded, ~s("app_name":"some name"))
-    assert String.contains?(encoded, ~s("app_version":"1.2.3"))
-    assert String.contains?(encoded, ~s("environment":"test"))
+      assert String.contains?(encoded, ~s("app_name":"some name"))
+      assert String.contains?(encoded, ~s("app_version":"1.2.3"))
+      assert String.contains?(encoded, ~s("environment":"test"))
+    end
+
+    test "can derive runtime struct from env" do
+      System.put_env("SERVICE_NAME", "service name")
+      System.put_env("SERVICE_VERSION", "service version")
+      System.put_env("SERVICE_ENV", "service env")
+
+      {:ok, runtime} = AuditLog.Runtime.from_env()
+
+      audit_log =
+        @example_log
+        |> AuditLog.runtime(runtime)
+
+      encoded = Jason.encode!(audit_log)
+
+      assert String.contains?(encoded, ~s("app_name":"service name"))
+      assert String.contains?(encoded, ~s("app_version":"service version"))
+      assert String.contains?(encoded, ~s("environment":"service env"))
+    end
   end
 end

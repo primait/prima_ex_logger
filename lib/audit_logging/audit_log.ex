@@ -1,18 +1,4 @@
 defmodule PrimaExLogger.AuditLogging.AuditLog do
-  @moduledoc """
-    "runtime": {
-      "type": ["object", "null"],
-      "description": "Represents the runtime details automatically injected by the library.",
-      "properties": {
-        "app_name": { "type": "string" },
-        "app_version": { "type": "string" },
-        "environment": { "type": "string" }
-      },
-      "required": ["app_name", "app_version", "environment"]
-    },
-  """
-
-
   @audit_log_scope "auditLog"
 
   @derive Jason.Encoder
@@ -37,5 +23,21 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
     @derive Jason.Encoder
     @enforce_keys [:app_name, :app_version, :environment]
     defstruct [:app_name, :app_version, :environment]
+
+    @service_name "SERVICE_NAME"
+    @service_version "SERVICE_VERSION"
+    @service_env "SERVICE_ENV"
+
+    def from_env() do
+      service_name = System.get_env(@service_name)
+      service_version = System.get_env(@service_version)
+      service_env = System.get_env(@service_env)
+
+      if service_name == nil or service_version == nil or service_env == nil do
+        {:error, "Missing environment variable"}
+      else
+        {:ok, %__MODULE__{app_name: service_name, app_version: service_version, environment: service_env}}
+      end
+    end
   end
 end
