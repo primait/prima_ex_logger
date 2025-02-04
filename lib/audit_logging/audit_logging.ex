@@ -23,9 +23,8 @@ defmodule PrimaExLogger.AuditLogging do
 
   @spec log(PrimaExLogger.AuditLogging.AuditLog) :: :ok | {:error, any()}
   def log(audit_log) do
-    with {:ok, encoded} <- Jason.encode(audit_log) do
-      IO.puts(encoded)
-    else
+    case Jason.encode(audit_log) do
+      {:ok, encoded} -> IO.puts(encoded)
       jason_error -> jason_error
     end
   end

@@ -1,4 +1,8 @@
 defmodule PrimaExLogger.AuditLogging.AuditLog do
+  @moduledoc """
+  Struct representation of and Audit log
+  """
+
   @audit_log_scope "auditLog"
 
   @derive Jason.Encoder
@@ -23,6 +27,8 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
   def runtime(log, runtime), do: %{log | runtime: runtime}
 
   defmodule Http do
+    @moduledoc false
+
     @derive Jason.Encoder
     @enforce_keys [:host, :user_agent_string, :http_method, :path, :remote_address]
     defstruct [:host, :user_agent_string, :http_method, :path, :remote_address, :correlation_id]
@@ -31,6 +37,8 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
   end
 
   defmodule Runtime do
+    @moduledoc false
+
     @derive Jason.Encoder
     @enforce_keys [:app_name, :app_version, :environment]
     defstruct [:app_name, :app_version, :environment]
