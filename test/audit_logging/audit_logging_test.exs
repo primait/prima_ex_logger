@@ -9,13 +9,12 @@ defmodule PrimaExLogger.AuditLoggingTest do
   test "log!/1 emits audit log" do
     io =
       capture_io(fn ->
-        audit_log =
-          %AuditLog{
-            actor: "actor",
-            event_name: "event_name",
-            message: "message",
-            timestamp: "timestamp"
-          }
+        audit_log = %AuditLog{
+          actor: "actor",
+          event_name: "event_name",
+          message: "message",
+          timestamp: "timestamp"
+        }
 
         AuditLogging.log!(audit_log)
       end)
@@ -34,13 +33,12 @@ defmodule PrimaExLogger.AuditLoggingTest do
   test "log/1 emits audit log" do
     io =
       capture_io(fn ->
-        audit_log =
-          %AuditLog{
-            actor: "actor",
-            event_name: "event_name",
-            message: "message",
-            timestamp: "timestamp"
-          }
+        audit_log = %AuditLog{
+          actor: "actor",
+          event_name: "event_name",
+          message: "message",
+          timestamp: "timestamp"
+        }
 
         :ok = AuditLogging.log(audit_log)
       end)
