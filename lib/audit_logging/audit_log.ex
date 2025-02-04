@@ -39,7 +39,7 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
     @service_version "SERVICE_VERSION"
     @service_env "SERVICE_ENV"
 
-    def from_env() do
+    def from_env do
       with {:ok, service_name} <- get_env(@service_name),
            {:ok, service_version} <- get_env(@service_version),
            {:ok, service_env} <- get_env(@service_env) do
@@ -54,10 +54,9 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
       end
     end
 
-    def from_env!() do
-      with {:ok, runtime} <- from_env() do
-        runtime
-      else
+    def from_env! do
+      case from_env() do
+        {:ok, runtime} -> runtime
         {:error, error} -> raise RuntimeError, error
       end
     end
