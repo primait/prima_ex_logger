@@ -54,6 +54,14 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
       end
     end
 
+    def from_env!() do
+      with {:ok, runtime} <- from_env() do
+        runtime
+      else
+        {:error, error} -> raise RuntimeError, error
+      end
+    end
+
     defp get_env(var) do
       case System.get_env(var) do
         nil -> {:error, var}

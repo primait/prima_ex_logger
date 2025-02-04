@@ -115,5 +115,13 @@ defmodule PrimaExLogger.AuditLogTest do
 
       assert error_msg == "Missing environment variable: SERVICE_ENV"
     end
+
+    test "will raise if runtime struct cannot be derived from env" do
+      System.put_env("SERVICE_NAME", "service name")
+      System.put_env("SERVICE_VERSION", "service version")
+      # missing SERVICE_ENV
+
+      assert_raise RuntimeError, fn -> AuditLog.Runtime.from_env!() end
+    end
   end
 end
