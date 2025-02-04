@@ -29,4 +29,32 @@ defmodule PrimaExLogger.AuditLogTest do
     assert String.contains?(encoded, "field1")
     assert String.contains?(encoded, "field2")
   end
+
+  test "can add and encode http struct" do
+    # required fields only
+    http = %AuditLog.Http{
+      host: "host",
+      user_agent_string: "user_agent",
+      http_method: "POST",
+      path: "/do-something",
+      remote_address: "123.123.123.123"
+    }
+
+    audit_log =
+      %AuditLog{
+        actor: "actor",
+        event_name: "event_name",
+        message: "message",
+        timestamp: "timestamp"
+      }
+      |> AuditLog.http(http)
+
+    encoded = Jason.encode!(audit_log)
+
+    assert String.contains?(encoded, "host")
+    assert String.contains?(encoded, "user_agent")
+    assert String.contains?(encoded, "POST")
+    assert String.contains?(encoded, "/do-something")
+    assert String.contains?(encoded, "123.123.123.123")
+  end
 end
