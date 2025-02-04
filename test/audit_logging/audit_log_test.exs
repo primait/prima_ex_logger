@@ -88,25 +88,31 @@ defmodule PrimaExLogger.AuditLogTest do
       assert String.contains?(encoded, ~s("environment":"test"))
     end
 
-    test "can derive runtime struct from env" do
+    test "from_env can derive runtime struct from env" do
       System.put_env("SERVICE_NAME", "service name")
       System.put_env("SERVICE_VERSION", "service version")
       System.put_env("SERVICE_ENV", "service env")
 
       {:ok, runtime} = AuditLog.Runtime.from_env()
 
-      audit_log =
-        @example_log
-        |> AuditLog.runtime(runtime)
-
-      encoded = Jason.encode!(audit_log)
-
-      assert String.contains?(encoded, ~s("app_name":"service name"))
-      assert String.contains?(encoded, ~s("app_version":"service version"))
-      assert String.contains?(encoded, ~s("environment":"service env"))
+      assert runtime.app_name == "service name"
+      assert runtime.app_version == "service version"
+      assert runtime.environment == "service env"
     end
 
-    test "will return error if runtime struct cannot be derived from env" do
+    test "from_env! can derive runtime struct from env" do
+      System.put_env("SERVICE_NAME", "service name")
+      System.put_env("SERVICE_VERSION", "service version")
+      System.put_env("SERVICE_ENV", "service env")
+
+      runtime = AuditLog.Runtime.from_env!()
+
+      assert runtime.app_name == "service name"
+      assert runtime.app_version == "service version"
+      assert runtime.environment == "service env"
+    end
+
+    test "from_env will return error if runtime struct cannot be derived from env" do
       System.put_env("SERVICE_NAME", "service name")
       System.put_env("SERVICE_VERSION", "service version")
       # missing SERVICE_ENV
@@ -116,7 +122,7 @@ defmodule PrimaExLogger.AuditLogTest do
       assert error_msg == "Missing environment variable: SERVICE_ENV"
     end
 
-    test "will raise if runtime struct cannot be derived from env" do
+    test "from_env! will raise if runtime struct cannot be derived from env" do
       System.put_env("SERVICE_NAME", "service name")
       System.put_env("SERVICE_VERSION", "service version")
       # missing SERVICE_ENV
