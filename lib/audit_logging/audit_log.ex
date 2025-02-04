@@ -3,7 +3,18 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
 
   @derive Jason.Encoder
   @enforce_keys [:actor, :event_name, :message, :timestamp]
-  defstruct [:actor, :event_name, :message, :timestamp, :created_at, :metadata, :target, :http, :runtime, scope: @audit_log_scope]
+  defstruct [
+    :actor,
+    :event_name,
+    :message,
+    :timestamp,
+    :created_at,
+    :metadata,
+    :target,
+    :http,
+    :runtime,
+    scope: @audit_log_scope
+  ]
 
   def created_at(log, created_at), do: %{log | created_at: created_at}
   def metadata(log, metadata), do: %{log | metadata: metadata}
@@ -29,14 +40,24 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
     @service_env "SERVICE_ENV"
 
     def from_env() do
-      service_name = System.get_env(@service_name)
-      service_version = System.get_env(@service_version)
-      service_env = System.get_env(@service_env)
-
-      if service_name == nil or service_version == nil or service_env == nil do
-        {:error, "Missing environment variable"}
+      with {:ok, service_name} <- get_env(@service_name),
+           {:ok, service_version} <- get_env(@service_version),
+           {:ok, service_env} <- get_env(@service_env) do
+        {:ok,
+         %__MODULE__{
+           app_name: service_name,
+           app_version: service_version,
+           environment: service_env
+         }}
       else
-        {:ok, %__MODULE__{app_name: service_name, app_version: service_version, environment: service_env}}
+        {:error, missing_var} -> {:error, "Missing environment variable: #{missing_var}"}
+      end
+    end
+
+    defp get_env(var) do
+      case System.get_env(var) do
+        nil -> {:error, var}
+        value -> {:ok, value}
       end
     end
   end

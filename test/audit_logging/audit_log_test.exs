@@ -64,6 +64,12 @@ defmodule PrimaExLogger.AuditLogTest do
   end
 
   describe "runtime" do
+    setup do
+      System.delete_env("SERVICE_NAME")
+      System.delete_env("SERVICE_VERSION")
+      System.delete_env("SERVICE_ENV")
+    end
+
     test "can add and encode runtime struct" do
       runtime = %AuditLog.Runtime{
         app_name: "some name",
@@ -98,6 +104,16 @@ defmodule PrimaExLogger.AuditLogTest do
       assert String.contains?(encoded, ~s("app_name":"service name"))
       assert String.contains?(encoded, ~s("app_version":"service version"))
       assert String.contains?(encoded, ~s("environment":"service env"))
+    end
+
+    test "will return error if runtime struct cannot be derived from env" do
+      System.put_env("SERVICE_NAME", "service name")
+      System.put_env("SERVICE_VERSION", "service version")
+      # missing SERVICE_ENV
+
+      {:error, error_msg} = AuditLog.Runtime.from_env()
+
+      assert error_msg == "Missing environment variable: SERVICE_ENV"
     end
   end
 end
