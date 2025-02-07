@@ -20,10 +20,32 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
     scope: @audit_log_scope
   ]
 
+  @type t :: %__MODULE__{
+          actor: String.t(),
+          event_name: String.t(),
+          message: String.t(),
+          timestamp: non_neg_integer() | String.t(),
+          scope: String.t(),
+          created_at: non_neg_integer() | String.t(),
+          metadata: Map.t(),
+          target: String.t(),
+          http: Http.t(),
+          runtime: Runtime.t()
+        }
+
+  @spec created_at(AuditLog.t(), non_neg_integer() | String.t()) :: AuditLog.t()
   def created_at(log, created_at), do: %{log | created_at: created_at}
+
+  @spec created_at(AuditLog.t(), Map.t()) :: AuditLog.t()
   def metadata(log, metadata), do: %{log | metadata: metadata}
+
+  @spec target(AuditLog.t(), String.t()) :: AuditLog.t()
   def target(log, target), do: %{log | target: target}
+
+  @spec target(AuditLog.t(), Http.t()) :: AuditLog.t()
   def http(log, http), do: %{log | http: http}
+
+  @spec target(AuditLog.t(), Runtime.t()) :: AuditLog.t()
   def runtime(log, runtime), do: %{log | runtime: runtime}
 
   defmodule Http do
@@ -33,6 +55,16 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
     @enforce_keys [:host, :user_agent_string, :http_method, :path, :remote_address]
     defstruct [:host, :user_agent_string, :http_method, :path, :remote_address, :correlation_id]
 
+    @type t :: %__MODULE__{
+            host: String.t(),
+            user_agent_string: String.t(),
+            http_method: String.t(),
+            path: String.t(),
+            remote_address: String.t(),
+            correlation_id: String.t()
+          }
+
+    @spec correlation_id(Http.t(), String.t()) :: Http.t()
     def correlation_id(http, correlation_id), do: %{http | correlation_id: correlation_id}
   end
 
@@ -43,10 +75,17 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
     @enforce_keys [:app_name, :app_version, :environment]
     defstruct [:app_name, :app_version, :environment]
 
+    @type t :: %__MODULE__{
+            app_name: String.t(),
+            app_version: String.t(),
+            environment: String.t()
+          }
+
     @service_name "SERVICE_NAME"
     @service_version "SERVICE_VERSION"
     @service_env "SERVICE_ENV"
 
+    @spec from_env() :: {:ok, Runtime.t()} | {:error, String.t()}
     def from_env do
       with {:ok, service_name} <- get_env(@service_name),
            {:ok, service_version} <- get_env(@service_version),
@@ -62,6 +101,7 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
       end
     end
 
+    @spec from_env!() :: Runtime.t()
     def from_env! do
       case from_env() do
         {:ok, runtime} -> runtime
