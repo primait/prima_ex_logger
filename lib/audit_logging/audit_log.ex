@@ -27,7 +27,7 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
           timestamp: non_neg_integer() | String.t(),
           scope: String.t(),
           created_at: non_neg_integer() | String.t(),
-          metadata: Map.t(),
+          metadata: map(),
           target: String.t(),
           http: __MODULE__.Http.t(),
           runtime: __MODULE__.Runtime.t()
@@ -36,7 +36,7 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
   @spec created_at(t(), non_neg_integer() | String.t()) :: t()
   def created_at(log, created_at), do: %{log | created_at: created_at}
 
-  @spec created_at(t(), Map.t()) :: t()
+  @spec metadata(t(), map()) :: t()
   def metadata(log, metadata), do: %{log | metadata: metadata}
 
   @spec target(t(), String.t()) :: t()
