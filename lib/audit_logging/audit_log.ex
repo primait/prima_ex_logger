@@ -29,23 +29,23 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
           created_at: non_neg_integer() | String.t(),
           metadata: Map.t(),
           target: String.t(),
-          http: Http.t(),
-          runtime: Runtime.t()
+          http: __MODULE__.Http.t(),
+          runtime: __MODULE__.Runtime.t()
         }
 
-  @spec created_at(t(), non_neg_integer() | String.t()) :: AuditLog.t()
+  @spec created_at(t(), non_neg_integer() | String.t()) :: t()
   def created_at(log, created_at), do: %{log | created_at: created_at}
 
-  @spec created_at(t(), Map.t()) :: AuditLog.t()
+  @spec created_at(t(), Map.t()) :: t()
   def metadata(log, metadata), do: %{log | metadata: metadata}
 
-  @spec target(t(), String.t()) :: AuditLog.t()
+  @spec target(t(), String.t()) :: t()
   def target(log, target), do: %{log | target: target}
 
-  @spec target(t(), Http.t()) :: AuditLog.t()
+  @spec target(t(), __MODULE__.Http.t()) :: t()
   def http(log, http), do: %{log | http: http}
 
-  @spec target(t(), Runtime.t()) :: AuditLog.t()
+  @spec target(t(), __MODULE__.Runtime.t()) :: t()
   def runtime(log, runtime), do: %{log | runtime: runtime}
 
   defmodule Http do
