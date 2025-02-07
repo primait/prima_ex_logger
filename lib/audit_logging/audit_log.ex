@@ -33,19 +33,19 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
           runtime: Runtime.t()
         }
 
-  @spec created_at(AuditLog.t(), non_neg_integer() | String.t()) :: AuditLog.t()
+  @spec created_at(t(), non_neg_integer() | String.t()) :: AuditLog.t()
   def created_at(log, created_at), do: %{log | created_at: created_at}
 
-  @spec created_at(AuditLog.t(), Map.t()) :: AuditLog.t()
+  @spec created_at(t(), Map.t()) :: AuditLog.t()
   def metadata(log, metadata), do: %{log | metadata: metadata}
 
-  @spec target(AuditLog.t(), String.t()) :: AuditLog.t()
+  @spec target(t(), String.t()) :: AuditLog.t()
   def target(log, target), do: %{log | target: target}
 
-  @spec target(AuditLog.t(), Http.t()) :: AuditLog.t()
+  @spec target(t(), Http.t()) :: AuditLog.t()
   def http(log, http), do: %{log | http: http}
 
-  @spec target(AuditLog.t(), Runtime.t()) :: AuditLog.t()
+  @spec target(t(), Runtime.t()) :: AuditLog.t()
   def runtime(log, runtime), do: %{log | runtime: runtime}
 
   defmodule Http do
@@ -64,7 +64,7 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
             correlation_id: String.t()
           }
 
-    @spec correlation_id(Http.t(), String.t()) :: Http.t()
+    @spec correlation_id(t(), String.t()) :: t()
     def correlation_id(http, correlation_id), do: %{http | correlation_id: correlation_id}
   end
 
@@ -85,7 +85,7 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
     @service_version "SERVICE_VERSION"
     @service_env "SERVICE_ENV"
 
-    @spec from_env() :: {:ok, Runtime.t()} | {:error, String.t()}
+    @spec from_env() :: {:ok, t()} | {:error, String.t()}
     def from_env do
       with {:ok, service_name} <- get_env(@service_name),
            {:ok, service_version} <- get_env(@service_version),
@@ -101,7 +101,7 @@ defmodule PrimaExLogger.AuditLogging.AuditLog do
       end
     end
 
-    @spec from_env!() :: Runtime.t()
+    @spec from_env!() :: t()
     def from_env! do
       case from_env() do
         {:ok, runtime} -> runtime
