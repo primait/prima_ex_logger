@@ -184,7 +184,8 @@ defmodule PrimaExLogger do
     opentelemetry_metadata(metadata, :datadog) ++ opentelemetry_metadata(metadata, :opentelemetry)
   end
 
-  defp get_as_binary(metadata, key), do: metadata |> Keyword.get(key, '') |> :binary.list_to_bin()
+  defp get_as_binary(metadata, key),
+    do: metadata |> Keyword.get(key, ~c"") |> :binary.list_to_bin()
 
   @spec to_printable(any(), list()) :: any()
   def to_printable(v, _) when is_binary(v), do: v
