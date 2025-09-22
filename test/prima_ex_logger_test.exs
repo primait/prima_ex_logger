@@ -238,6 +238,31 @@ defmodule PrimaExLoggerTest do
                "trace_flags" => "01"
              }
     end
+
+    test "values can be binary()" do
+      io =
+        capture_io(fn ->
+          logger = new_logger(opentelemetry_metadata: :detailed)
+
+          log(logger, "hello world!", :info,
+            # This is the log metadata automatically added by opentelemetry sdk >= 1.1.0
+            otel_trace_id: "3f654ec56f0380000000000000000015",
+            otel_span_id: "f000000000000005",
+            otel_trace_flags: "01"
+          )
+
+          :gen_event.stop(logger)
+        end)
+
+      event = Jason.decode!(io)
+      assert event["dd"] == %{"trace_id" => "21", "span_id" => "17293822569102704645"}
+
+      assert event["otel"] == %{
+               "trace_id" => "3f654ec56f0380000000000000000015",
+               "span_id" => "f000000000000005",
+               "trace_flags" => "01"
+             }
+    end
   end
 
   defp new_logger(opts \\ []) do

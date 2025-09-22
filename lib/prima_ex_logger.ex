@@ -185,7 +185,13 @@ defmodule PrimaExLogger do
   end
 
   defp get_as_binary(metadata, key),
-    do: metadata |> Keyword.get(key, ~c"") |> :binary.list_to_bin()
+    do: metadata |> Keyword.get(key, "") |> ensure_binary()
+
+  # Older version of opentelemetry encoded some metadata values as charlists
+  # instead of using binaries, so we do a check here to ensure compatibility with both
+  @spec ensure_binary(binary() | charlist()) :: binary()
+  defp ensure_binary(v) when is_binary(v), do: v
+  defp ensure_binary(v) when is_list(v), do: :binary.list_to_bin(v)
 
   @spec to_printable(any(), list()) :: any()
   def to_printable(v, _) when is_binary(v), do: v
