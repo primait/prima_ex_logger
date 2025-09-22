@@ -238,6 +238,7 @@ defmodule PrimaExLoggerTest do
                "trace_flags" => "01"
              }
     end
+
     test "values can be binary()" do
       io =
         capture_io(fn ->
