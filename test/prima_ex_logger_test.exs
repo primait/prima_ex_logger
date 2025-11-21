@@ -263,6 +263,24 @@ defmodule PrimaExLoggerTest do
                "trace_flags" => "01"
              }
     end
+
+    test "PrimaExLogger.install removes default handler if present" do
+      # reset logger OTP status
+      for {id, _cfg} <- :logger.get_handler_ids() do
+        :ok = :logger.remove_handler(id)
+      end
+
+      :ok = :logger.add_handler(:default, :logger_std_h, %{config: %{type: :standard_io}})
+      assert Enum.any?(:logger.get_handler_ids(), &(&1 == :default))
+
+      assert :ok = PrimaExLogger.install(:prima_logger)
+
+      # now default shouldn't be here anymore
+      refute Enum.any?(:logger.get_handler_ids(), &(&1 == :default))
+
+      # cleanup
+      _ = :logger.remove_handler(:prima_logger)
+    end
   end
 
   defp new_logger(opts \\ []) do
