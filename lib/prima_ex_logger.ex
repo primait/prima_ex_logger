@@ -14,6 +14,17 @@ defmodule PrimaExLogger do
   """
   @type settings() :: map()
 
+  @spec install(atom()) :: Supervisor.on_start_child()
+  def install(name \\ :prima_logger) do
+    opts = Application.get_env(:logger, name, [])
+
+    if not Keyword.get(opts, :default_handler, true) do
+      _ = :logger.remove_handler(:default)
+    end
+
+    LoggerBackends.add({__MODULE__, name})
+  end
+
   @spec init({PrimaExLogger, atom()}) :: {:error, any()} | {:ok, any()} | {:ok, any(), :hibernate}
   def init({__MODULE__, name}) do
     {:ok, configure(name, [])}

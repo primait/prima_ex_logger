@@ -28,6 +28,7 @@ defmodule PrimaExLogger.MixProject do
 
   defp deps do
     [
+      {:logger_backends, "~> 1.0"},
       {:decimal, "~> 2.0", only: [:test]},
       {:jason, "~> 1.2", only: [:test]},
       {:poison, "~> 6.0", only: [:test]},

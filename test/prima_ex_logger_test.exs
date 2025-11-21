@@ -1,5 +1,5 @@
 defmodule PrimaExLoggerTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
   require Logger
 
@@ -264,22 +264,37 @@ defmodule PrimaExLoggerTest do
              }
     end
 
-    test "PrimaExLogger.install removes default handler if present" do
-      # reset logger OTP status
-      for {id, _cfg} <- :logger.get_handler_ids() do
-        :ok = :logger.remove_handler(id)
+    test "PrimaExLogger.install won't remove default handler if config not specified" do
+      _ = :logger.remove_handler(:prima_logger)
+      on_exit(fn -> _ = :logger.remove_handler(:prima_logger) end)
+
+      unless Enum.any?(:logger.get_handler_ids(), &(&1 == :default)) do
+        :ok = :logger.add_handler(:default, :logger_std_h, %{config: %{type: :standard_io}})
       end
 
-      :ok = :logger.add_handler(:default, :logger_std_h, %{config: %{type: :standard_io}})
       assert Enum.any?(:logger.get_handler_ids(), &(&1 == :default))
 
-      assert :ok = PrimaExLogger.install(:prima_logger)
+      assert {:ok, _pid} = PrimaExLogger.install(:handler_together_with_default)
 
-      # now default shouldn't be here anymore
+      # default is still there
+      assert Enum.any?(:logger.get_handler_ids(), &(&1 == :default))
+    end
+
+    test "PrimaExLogger.install removes default handler if config specifies default_handler: false" do
+      unless Enum.any?(:logger.get_handler_ids(), &(&1 == :default)) do
+        :ok = :logger.add_handler(:default, :logger_std_h, %{config: %{type: :standard_io}})
+      end
+
+      assert Enum.any?(:logger.get_handler_ids(), &(&1 == :default))
+
+      Application.put_env(:logger, :handler_without_default, default_handler: false)
+
+      assert {:ok, _pid} = PrimaExLogger.install(:handler_without_default)
+
+      # default is not there anymore
       refute Enum.any?(:logger.get_handler_ids(), &(&1 == :default))
 
-      # cleanup
-      _ = :logger.remove_handler(:prima_logger)
+      Application.delete_env(:logger, :handler_without_default)
     end
   end
 
