@@ -1,5 +1,5 @@
 defmodule PrimaExLoggerTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
   require Logger
 
@@ -262,6 +262,39 @@ defmodule PrimaExLoggerTest do
                "span_id" => "f000000000000005",
                "trace_flags" => "01"
              }
+    end
+
+    test "PrimaExLogger.install won't remove default handler if config not specified" do
+      _ = :logger.remove_handler(:prima_logger)
+      on_exit(fn -> _ = :logger.remove_handler(:prima_logger) end)
+
+      unless Enum.any?(:logger.get_handler_ids(), &(&1 == :default)) do
+        :ok = :logger.add_handler(:default, :logger_std_h, %{config: %{type: :standard_io}})
+      end
+
+      assert Enum.any?(:logger.get_handler_ids(), &(&1 == :default))
+
+      assert {:ok, _pid} = PrimaExLogger.install(:handler_together_with_default)
+
+      # default is still there
+      assert Enum.any?(:logger.get_handler_ids(), &(&1 == :default))
+    end
+
+    test "PrimaExLogger.install removes default handler if config specifies default_handler: false" do
+      unless Enum.any?(:logger.get_handler_ids(), &(&1 == :default)) do
+        :ok = :logger.add_handler(:default, :logger_std_h, %{config: %{type: :standard_io}})
+      end
+
+      assert Enum.any?(:logger.get_handler_ids(), &(&1 == :default))
+
+      Application.put_env(:logger, :handler_without_default, default_handler: false)
+
+      assert {:ok, _pid} = PrimaExLogger.install(:handler_without_default)
+
+      # default is not there anymore
+      refute Enum.any?(:logger.get_handler_ids(), &(&1 == :default))
+
+      Application.delete_env(:logger, :handler_without_default)
     end
   end
 
