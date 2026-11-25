@@ -89,7 +89,7 @@ defmodule PrimaExLogger do
   @spec forge_event(tuple(), settings()) :: map()
   defp forge_event({level, _, {Logger, message, timestamp, metadata}}, settings) do
     %{
-      "message" => IO.iodata_to_binary(message),
+      "message" => message |> IO.iodata_to_binary() |> replace_invalid_utf8(),
       "level" => level,
       "type" => settings.type,
       "country" => format_country(settings.country),
@@ -99,6 +99,50 @@ defmodule PrimaExLogger do
     }
     |> add_opentelemetry_metadata(metadata, settings)
   end
+
+  # Messages can embed raw or Latin-1 binaries (e.g. crash reports). Invalid UTF-8 would make
+  # the encoder fail or the IO device crash, losing the log, so replace it with U+FFFD.
+  # Equivalent to `String.replace_invalid/1`, which needs Elixir 1.16.
+  @spec replace_invalid_utf8(binary()) :: String.t()
+  defp replace_invalid_utf8(binary) do
+    if String.valid?(binary) do
+      binary
+    else
+      case :unicode.characters_to_binary(binary) do
+        {:error, valid, invalid} ->
+          size = invalid_sequence_size(invalid)
+          <<_::binary-size(size), rest::binary>> = invalid
+          valid <> "\uFFFD" <> replace_invalid_utf8(rest)
+
+        {:incomplete, valid, _rest} ->
+          valid <> "\uFFFD"
+      end
+    end
+  end
+
+  # Whether `byte` can follow `lead` in a well-formed UTF-8 sequence (Unicode table 3-7).
+  defguardp valid_second_byte(lead, byte)
+            when (lead in 0xC2..0xDF and byte in 0x80..0xBF) or
+                   (lead == 0xE0 and byte in 0xA0..0xBF) or
+                   (lead in 0xE1..0xEC and byte in 0x80..0xBF) or
+                   (lead == 0xED and byte in 0x80..0x9F) or
+                   (lead in 0xEE..0xEF and byte in 0x80..0xBF) or
+                   (lead == 0xF0 and byte in 0x90..0xBF) or
+                   (lead in 0xF1..0xF3 and byte in 0x80..0xBF) or
+                   (lead == 0xF4 and byte in 0x80..0x8F)
+
+  # Length of the "maximal subpart" at the start of an invalid sequence: the bytes that
+  # began a well-formed character before it was cut short, replaced by a single U+FFFD.
+  @spec invalid_sequence_size(binary()) :: 1..3
+  defp invalid_sequence_size(<<lead, second, third, _::binary>>)
+       when lead in 0xF0..0xF4 and valid_second_byte(lead, second) and third in 0x80..0xBF,
+       do: 3
+
+  defp invalid_sequence_size(<<lead, second, _::binary>>)
+       when valid_second_byte(lead, second),
+       do: 2
+
+  defp invalid_sequence_size(_), do: 1
 
   @spec process_metadata(Logger.metadata(), settings()) :: map()
   defp process_metadata(metadata, settings) do
