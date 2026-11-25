@@ -1,0 +1,27 @@
+# Mirrors the toolchain in .github/workflows/ci.yml (OTP 25, Elixir 1.15).
+[tools]
+erlang = "25.3.2.21"
+elixir = "1.15.8-otp-25"
+
+[env]
+MIX_ENV = "test"
+
+[tasks.install]
+description = "Install the toolchain and fetch dependencies"
+run = ["{{mise_bin}} install", "mix deps.get"]
+
+[tasks.test]
+description = "Run the test suite (pass extra mix test args, e.g. a file:line)"
+run = "mix test"
+
+[tasks.format]
+description = "Format all Elixir sources"
+run = "mix format.all"
+
+[tasks.check]
+description = "Run the CI checks: unused deps, warnings, formatting, Credo, Dialyzer"
+run = [
+  "mix deps.unlock --check-unused",
+  "mix compile --warnings-as-errors --force",
+  "mix check",
+]

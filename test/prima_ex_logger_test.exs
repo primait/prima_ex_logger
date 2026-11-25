@@ -22,6 +22,56 @@ defmodule PrimaExLoggerTest do
     assert event["level"] == "info"
   end
 
+  # Invalid sequences are replaced following Unicode's "maximal subpart" practice
+  # (one U+FFFD per truncated sequence), as `String.replace_invalid/1` does.
+  for {kind, message, expected_message} <- [
+        {"a Latin-1 character", "Hello caf" <> <<0xE9>> <> " world", "Hello caf\uFFFD world"},
+        {"a stray continuation byte", "Hello " <> <<0xAA>> <> " world", "Hello \uFFFD world"},
+        {"a byte never valid in UTF-8", "Hello " <> <<0xFF>> <> " world", "Hello \uFFFD world"},
+        {"an overlong encoding", "Hello " <> <<0xC0, 0xAF>> <> " world",
+         "Hello \uFFFD\uFFFD world"},
+        {"a UTF-16 surrogate", "Hello " <> <<0xED, 0xA0, 0x80>> <> " world",
+         "Hello \uFFFD\uFFFD\uFFFD world"},
+        {"a truncated sequence", "Hello " <> <<0xE2, 0x82>> <> " world", "Hello \uFFFD world"},
+        {"a truncated 4-byte sequence", "Hello " <> <<0xF0, 0x9F, 0x8E>> <> " world",
+         "Hello \uFFFD world"},
+        {"a truncated sequence at the end", "Hello world" <> <<0xE2, 0x82>>, "Hello world\uFFFD"},
+        {"several invalid bytes", "caf" <> <<0xE9>> <> " na" <> <<0xEF>> <> "ve",
+         "caf\uFFFD na\uFFFDve"},
+        {"characters JSON must escape", "quote \" backslash \\ newline \n tab \t nul \0",
+         "quote \" backslash \\ newline \n tab \t nul \0"},
+        {"multi-byte and invisible characters", "caf\u00E9 \u2028 \u2029 \uFEFF 🎉",
+         "caf\u00E9 \u2028 \u2029 \uFEFF 🎉"}
+      ] do
+    test "Logs messages containing #{kind} as JSON with the expected text" do
+      # Arrange
+      message = unquote(message)
+      expected_message = unquote(expected_message)
+
+      # Act
+      io =
+        capture_io(fn ->
+          logger = new_logger()
+          log(logger, message, :error)
+          :gen_event.stop(logger)
+        end)
+
+      # Assert
+      decoded = Jason.decode(io)
+
+      assert match?({:ok, _}, decoded),
+             "Expected a JSON log line but got #{printable(io)} for a message containing #{unquote(kind)}"
+
+      {:ok, event} = decoded
+
+      assert event["message"] == expected_message,
+             "Expected message #{printable(expected_message)} but got #{printable(event["message"])} for a message containing #{unquote(kind)}"
+
+      assert event["level"] == "error",
+             "Expected level \"error\" but got #{printable(event["level"])} for a message containing #{unquote(kind)}"
+    end
+  end
+
   test "Log messages end with newline" do
     io =
       capture_io(fn ->
@@ -297,6 +347,9 @@ defmodule PrimaExLoggerTest do
       Application.delete_env(:logger, :handler_without_default)
     end
   end
+
+  # Plain inspect/1 renders invalid UTF-8 as a byte list truncated after 50 bytes.
+  defp printable(value), do: inspect(value, binaries: :as_strings, printable_limit: :infinity)
 
   defp new_logger(opts \\ []) do
     {:ok, manager} = :gen_event.start_link()

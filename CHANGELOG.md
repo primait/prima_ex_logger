@@ -8,6 +8,13 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- Log messages containing invalid UTF-8 (e.g. Latin-1 text or raw bytes in crash
+  reports) are now logged as JSON at their original level, with the invalid
+  bytes replaced by U+FFFD. Previously they were replaced by a truncated
+  non-JSON `Error during JSON encoding` line, or crashed the handler.
+
 ---
 
 ## [0.6.0] - 2025-11-21
