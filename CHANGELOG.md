@@ -10,6 +10,16 @@ and this project adheres to
 
 ---
 
+## [0.6.2] - 2026-11-25
+
+### Fixed
+
+- Release and retire workflows run on `ubuntu-24.04`, as `ubuntu-latest` has no
+  OTP 25 builds. 0.6.1 was tagged but never published to Hex; this release
+  contains its fix.
+
+---
+
 ## [0.6.1] - 2026-11-25
 
 ### Fixed
@@ -84,7 +94,8 @@ and this project adheres to
 ## [0.2.5] - 2022-06-16
 
 
-[Unreleased]: https://github.com/primait/prima_ex_logger/compare/0.6.1...HEAD
+[Unreleased]: https://github.com/primait/prima_ex_logger/compare/0.6.2...HEAD
+[0.6.2]: https://github.com/primait/prima_ex_logger/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/primait/prima_ex_logger/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/primait/prima_ex_logger/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/primait/prima_ex_logger/compare/0.5.0...0.5.1
